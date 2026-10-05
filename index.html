@@ -806,17 +806,17 @@ tr.zone-row.hidden { display: none; }
       <table id="tblByDiscom">
         <thead>
           <tr>
-            <th class="tx nosort">Name</th>
-            <th>Feeders</th>
-            <th>Input MU</th>
-            <th>Billed MU</th>
-            <th>Billing Eff.</th>
-            <th>Collection Eff.</th>
-            <th>AT&amp;C Loss</th>
-            <th>ABR ₹/kWh</th>
-            <th>Thru Rate ₹/kWh</th>
-            <th>Realised ₹Cr</th>
-            <th>AT&amp;C Loss Value ₹Cr</th>
+            <th class="tx" data-dcol="discom">Name <span class="sort-ico">↕</span></th>
+            <th data-dcol="feeders">Feeders <span class="sort-ico">↕</span></th>
+            <th data-dcol="inputMu">Input MU <span class="sort-ico">↕</span></th>
+            <th data-dcol="billedMu">Billed MU <span class="sort-ico">↕</span></th>
+            <th data-dcol="billingEff">Billing Eff. <span class="sort-ico">↕</span></th>
+            <th data-dcol="collectionEff">Collection Eff. <span class="sort-ico">↕</span></th>
+            <th data-dcol="atcLoss">AT&amp;C Loss <span class="sort-ico">↕</span></th>
+            <th data-dcol="abr">ABR ₹/kWh <span class="sort-ico">↕</span></th>
+            <th data-dcol="thruRate">Thru Rate ₹/kWh <span class="sort-ico">↕</span></th>
+            <th data-dcol="realisedCr">Realised ₹Cr <span class="sort-ico">↕</span></th>
+            <th data-dcol="atcLossValueCr">AT&amp;C Loss Value ₹Cr <span class="sort-ico">↕</span></th>
           </tr>
         </thead>
         <tbody id="byDiscomBody">
@@ -960,6 +960,7 @@ tr.zone-row.hidden { display: none; }
       </div>
       <div style="display:flex;gap:8px;align-items:center;">
         <input type="search" id="tSearch" placeholder="Filter table rows..." style="max-width:180px;">
+        <button class="btn" id="btnExportSummaryTable" type="button" style="padding:5px 12px;font-size:12px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:500;display:inline-flex;align-items:center;gap:4px;">⬇ Export Table CSV</button>
       </div>
     </div>
     <div class="tw scroll">
@@ -1064,6 +1065,8 @@ let state = {
   excludeZeroInput: false,
   sortCol: null,
   sortDir: 1,
+  discomSortCol: null,
+  discomSortDir: -1,
   collapsedDiscoms: new Set(),
   hBarType: 'atc',
   ftBarGroup: 'feederType',
@@ -1095,8 +1098,12 @@ function fmt(n, decimals = 0) {
 }
 
 function lossPill(val, isLine = true) {
-  const v = parseFloat(val);
+  let v = parseFloat(val);
   if (isNaN(v)) return `<span class="pill p-na">${val || '—'}</span>`;
+  // Safeguard: if value is stored as fraction (e.g. 0.9134 for 91.34%), scale by 100
+  if (Math.abs(v) <= 1.0 && v !== 0) {
+    v = v * 100;
+  }
   const [t1, t2, t3] = isLine ? [10, 30, 50] : [20, 50, 70];
   const cls = v < t1 ? 'p-good' : v < t2 ? 'p-warn' : v < t3 ? 'p-serious' : 'p-crit';
   return `<span class="pill ${cls}">${v.toFixed(1)}%</span>`;
@@ -1220,8 +1227,9 @@ async function loadKpis() {
     } catch {
       const res = await fetch('data/kpis.json');
       const json = await res.json();
-      const key = state.discom || 'ALL';
-      d = json[key] || json['ALL'];
+      const dKey = state.discom || 'ALL';
+      const comboKey = `${dKey}_abn${state.excludeAbnormal ? 1 : 0}_bgt${state.excludeBilledGtInput ? 1 : 0}_zi${state.excludeZeroInput ? 1 : 0}`;
+      d = json[comboKey] || json[dKey] || json['ALL'];
     }
 
     document.getElementById('kpiIE').textContent = fmt(d.inputEnergyMu);
@@ -1337,7 +1345,51 @@ function initMonthlyCharts() {
   });
 }
 
-// ── By Discom Summary Table (NEW) ──
+// ── By Discom Summary Table (Interactive Sorting + Exclusions) ──
+function renderByDiscomTable() {
+  const tbody = document.getElementById('byDiscomBody');
+  let rows = [...(state.discomSummaryData || [])];
+
+  if (state.discom) {
+    const dUpper = normalizeDiscom(state.discom).toUpperCase();
+    rows = rows.filter(r => r.discom && r.discom.toUpperCase().includes(dUpper));
+  }
+
+  if (state.discomSortCol) {
+    const col = state.discomSortCol;
+    const dir = state.discomSortDir;
+    rows.sort((a, b) => {
+      const va = a[col];
+      const vb = b[col];
+      if (typeof va === 'string') {
+        return dir * va.localeCompare(vb);
+      }
+      return dir * ((Number(va) || 0) - (Number(vb) || 0));
+    });
+  }
+
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:16px;color:var(--ink-3)">No data available for current selection.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map(r => `
+    <tr class="drill" onclick="filterByDiscomName('${r.discom}')" title="Click to filter by ${r.discom}">
+      <td class="tx" style="font-weight:600;color:var(--accent);">${r.discom}</td>
+      <td>${fmt(r.feeders)}</td>
+      <td>${fmt(r.inputMu, 1)}</td>
+      <td>${fmt(r.billedMu, 1)}</td>
+      <td>${fmt(r.billingEff, 1)}%</td>
+      <td>${fmt(r.collectionEff, 1)}%</td>
+      <td>${lossPill(r.atcLoss, false)}</td>
+      <td>₹${fmt(r.abr, 2)}</td>
+      <td>${thruRatePill(r.thruRate)}</td>
+      <td>₹${fmt(r.realisedCr, 1)}</td>
+      <td style="font-weight:600;color:var(--crit);">₹${fmt(r.atcLossValueCr, 1)}</td>
+    </tr>
+  `).join('');
+}
+
 async function loadByDiscomSummary() {
   const tbody = document.getElementById('byDiscomBody');
   try {
@@ -1350,30 +1402,12 @@ async function loadByDiscomSummary() {
       rows = json.data;
     } catch {
       const res = await fetch('data/discom_summary.json');
-      rows = await res.json();
+      const json = await res.json();
+      const comboKey = `abn${state.excludeAbnormal ? 1 : 0}_bgt${state.excludeBilledGtInput ? 1 : 0}_zi${state.excludeZeroInput ? 1 : 0}`;
+      rows = json[comboKey] || json['default'] || (Array.isArray(json) ? json : []);
     }
     state.discomSummaryData = rows;
-
-    if (!rows.length) {
-      tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:16px;color:var(--ink-3)">No data available for current selection.</td></tr>`;
-      return;
-    }
-
-    tbody.innerHTML = rows.map(r => `
-      <tr class="drill" onclick="filterByDiscomName('${r.discom}')" title="Click to filter by ${r.discom}">
-        <td class="tx" style="font-weight:600;color:var(--accent);">${r.discom}</td>
-        <td>${fmt(r.feeders)}</td>
-        <td>${fmt(r.inputMu, 1)}</td>
-        <td>${fmt(r.billedMu, 1)}</td>
-        <td>${fmt(r.billingEff, 1)}%</td>
-        <td>${fmt(r.collectionEff, 1)}%</td>
-        <td>${lossPill(r.atcLoss, false)}</td>
-        <td>₹${fmt(r.abr, 2)}</td>
-        <td>${thruRatePill(r.thruRate)}</td>
-        <td>₹${fmt(r.realisedCr, 1)}</td>
-        <td style="font-weight:600;color:var(--crit);">₹${fmt(r.atcLossValueCr, 1)}</td>
-      </tr>
-    `).join('');
+    renderByDiscomTable();
   } catch (err) {
     console.error('Failed to load discom summary:', err);
     tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:16px;color:var(--ink-3)">Failed to load data.</td></tr>`;
@@ -1580,7 +1614,7 @@ async function loadWorstFeeders() {
     let total = 0;
     let rows = [];
     const q = buildQueryString();
-    const queryStr = q ? `${q}&type=atc_loss&slab=Above%2070%25&page=1&limit=10` : `?type=atc_loss&slab=Above%2070%25&page=1&limit=10`;
+    const queryStr = q ? `${q}&type=atc_loss&slab=Above%2070%25&page=1&limit=10&sortBy=atc_loss&sortDir=DESC` : `?type=atc_loss&slab=Above%2070%25&page=1&limit=10&sortBy=atc_loss&sortDir=DESC`;
 
     try {
       const res = await fetch(`/api/psr/feeders${queryStr}`);
@@ -1595,7 +1629,22 @@ async function loadWorstFeeders() {
       const key = state.discom || 'ALL';
       const item = json[key] || json['ALL'];
       total = item.total || 0;
-      rows = (item.rows || []).slice(0, 10);
+      let pool = item.rows || [];
+      if (state.excludeAbnormal) {
+        pool = pool.filter(r => {
+          const ass = Number(r[10]) || 0;
+          const se = Number(r[9]) || 0;
+          const abr = se > 0 ? (ass * 100) / se : 0;
+          return abr <= 50;
+        });
+      }
+      if (state.excludeBilledGtInput) {
+        pool = pool.filter(r => (Number(r[9]) || 0) <= (Number(r[8]) || 0));
+      }
+      if (state.excludeZeroInput) {
+        pool = pool.filter(r => (Number(r[18]) || 0) > 0);
+      }
+      rows = pool.slice(0, 10);
     }
 
     if (!rows.length) {
@@ -1637,6 +1686,13 @@ async function loadTop150Feeders() {
     } catch {
       const res = await fetch('data/top_atc_loss.json');
       rows = await res.json();
+      if (state.discom) {
+        const dUpper = normalizeDiscom(state.discom).toUpperCase();
+        rows = rows.filter(r => r.discom && r.discom.toUpperCase().includes(dUpper));
+      }
+      if (state.excludeAbnormal) {
+        rows = rows.filter(r => (Number(r.abr) || 0) <= 50);
+      }
     }
     state.top150Data = rows;
 
@@ -1783,6 +1839,83 @@ document.querySelectorAll('#summaryTbl th[data-col]').forEach(th => {
     renderSummaryTable();
   });
 });
+
+// ── By Discom Table Sorting Click Listeners ──
+document.querySelectorAll('#tblByDiscom th[data-dcol]').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.getAttribute('data-dcol');
+    if (state.discomSortCol === col) {
+      state.discomSortDir *= -1;
+    } else {
+      state.discomSortCol = col;
+      state.discomSortDir = -1; // Default to descending on first click
+    }
+    document.querySelectorAll('#tblByDiscom th.sorted').forEach(t => t.classList.remove('sorted'));
+    th.classList.add('sorted');
+    th.querySelector('.sort-ico').textContent = state.discomSortDir === 1 ? '▲' : '▼';
+    renderByDiscomTable();
+  });
+});
+
+// ── Export Progressive Summary Table as CSV ──
+function exportProgressiveSummaryCsv() {
+  const search = state.tableSearch.toLowerCase();
+  const zoneFilter = state.zone.toLowerCase();
+
+  let data = [...state.summaryData];
+  if (zoneFilter) {
+    data = data.filter(r => r.row_type === 3 || (r.zone && r.zone.toLowerCase().includes(zoneFilter)));
+  }
+  if (search) {
+    data = data.filter(r => r.row_type === 3 || (r.discom && r.discom.toLowerCase().includes(search)) || (r.zone && r.zone.toLowerCase().includes(search)));
+  }
+
+  const headers = [
+    'Discom','Zone','Total Feeders',
+    'Line 0-5%','Line 5-10%','Line 10-20%','Line 20-30%',
+    'Line 30-50%','Line 50-70%','Line >70%','Line Abnormal',
+    'AT&C 0-5%','AT&C 5-10%','AT&C 10-20%','AT&C 20-30%',
+    'AT&C 30-50%','AT&C 50-70%','AT&C >70%','AT&C Abnormal',
+    'IE 0','No Consumers Tagged'
+  ];
+
+  const escapeVal = (v) => {
+    if (v === null || v === undefined) return '';
+    const s = String(v);
+    if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+      return `"${s.replace(/"/g, '""')}"`;
+    }
+    return s;
+  };
+
+  const csvLines = [headers.join(',')];
+  for (const r of data) {
+    const discomName = r.row_type === 3 ? 'UPPCL' : r.discom;
+    const zoneName = r.row_type === 3 ? 'Statewide Total' : r.row_type === 2 ? `${r.discom} Total` : (r.zone || '');
+    csvLines.push([
+      escapeVal(discomName),
+      escapeVal(zoneName),
+      r.total_feeders,
+      r.line_0_5, r.line_5_10, r.line_10_20, r.line_20_30,
+      r.line_30_50, r.line_50_70, r.line_above_70, r.line_abnormal,
+      r.atc_0_5, r.atc_5_10, r.atc_10_20, r.atc_20_30,
+      r.atc_30_50, r.atc_50_70, r.atc_above_70, r.atc_abnormal,
+      r.ie_zero, r.no_consumers_tagged
+    ].join(','));
+  }
+
+  const blob = new Blob([csvLines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `UPPCL_Progressive_Summary_Discoms_Zones_${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById('btnExportSummaryTable').addEventListener('click', exportProgressiveSummaryCsv);
 
 // ── Filter Chips ──
 function updateChips() {
