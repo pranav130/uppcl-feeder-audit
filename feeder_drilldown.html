@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Feeder Audit Data Drill-Down</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background: #f4f6f9; color: #212529; padding: 20px 24px; }
+        
+        .header { 
+            background: linear-gradient(135deg, #2c3e50, #34495e); 
+            color: white; 
+            padding: 22px 28px; 
+            border-radius: 12px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .header-left h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+        .header-left p { font-size: 13px; opacity: 0.85; }
+        .header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 6px;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .btn-csv { background: #007bff; color: white; box-shadow: 0 2px 6px rgba(0,123,255,0.3); }
+        .btn-csv:hover { background: #0069d9; transform: translateY(-1px); }
+        .btn-excel { background: #28a745; color: white; box-shadow: 0 2px 6px rgba(40,167,69,0.3); }
+        .btn-excel:hover { background: #218838; transform: translateY(-1px); }
+        .btn-back { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); }
+        .btn-back:hover { background: rgba(255,255,255,0.3); }
+        
+        .kpi-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
+        .kpi-card { background: white; padding: 14px 18px; border-radius: 10px; border-left: 4px solid #2c3e50; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        .kpi-label { font-size: 11px; font-weight: 600; color: #6c757d; text-transform: uppercase; margin-bottom: 4px; }
+        .kpi-value { font-size: 20px; font-weight: 700; color: #111; }
+        .kpi-sub { font-size: 11px; color: #28a745; font-weight: 600; margin-top: 2px; }
+
+        .table-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        .filter-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+        .search-box { display: flex; align-items: center; gap: 8px; flex: 1; max-width: 450px; }
+        .search-box input { width: 100%; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 13px; outline: none; }
+        .search-box input:focus { border-color: #2c3e50; box-shadow: 0 0 0 2px rgba(31,78,120,0.15); }
+        
+        .filter-controls { display: flex; align-items: center; gap: 12px; }
+        select { padding: 8px 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 13px; background: white; outline: none; }
+        
+        .table-container { overflow-x: auto; max-height: 600px; border: 1px solid #e9ecef; border-radius: 6px; }
+        table { width: 100%; border-collapse: collapse; font-size: 11.5px; white-space: nowrap; }
+        thead { position: sticky; top: 0; z-index: 2; }
+        th { background: #2c3e50; color: white; padding: 10px 8px; font-weight: 600; text-align: right; border-right: 1px solid rgba(255,255,255,0.15); }
+        th.text-left { text-align: left; }
+        td { padding: 7px 8px; text-align: right; border-bottom: 1px solid #dee2e6; border-right: 1px solid #f1f3f5; }
+        td.text-left { text-align: left; }
+        tr:hover { background: #f8f9fa; }
+        tr:nth-child(even) { background: #fafbfc; }
+        
+        .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; font-size: 12.5px; color: #6c757d; }
+        .page-buttons { display: flex; gap: 4px; }
+        .page-btn { padding: 6px 12px; border: 1px solid #dee2e6; background: white; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .page-btn.active { background: #2c3e50; color: white; border-color: #2c3e50; }
+        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="header-left">
+            <h1 id="pageTitle">UPPCL 11KV Feeder Audit Data</h1>
+            <p id="pageSub">Audit Data Rows for Selected Slab | Progressive Cumulative Upto August 2026</p>
+        </div>
+        <div class="header-actions">
+            <a id="btnCsv" href="#" class="btn btn-csv" download>
+                📥 Download Filtered CSV
+            </a>
+            <a id="btnExcel" href="#" class="btn btn-excel" download>
+                📥 Download Excel (.xlsx)
+            </a>
+            <button onclick="window.close(); if(!window.closed) history.back();" class="btn btn-back">
+                ← Back to Dashboard
+            </button>
+        </div>
+    </div>
+
+    <div class="kpi-strip">
+        <div class="kpi-card" style="border-left-color: #2c3e50;">
+            <div class="kpi-label">Feeders in Slab</div>
+            <div class="kpi-value" id="kpiFeeders">0</div>
+            <div class="kpi-sub" id="kpiSlabName">Slab</div>
+        </div>
+        <div class="kpi-card" style="border-left-color: #007bff;">
+            <div class="kpi-label">Input Energy Prog.</div>
+            <div class="kpi-value" id="kpiIE">0.0</div>
+            <div class="kpi-sub">MWh (Cumulative)</div>
+        </div>
+        <div class="kpi-card" style="border-left-color: #28a745;">
+            <div class="kpi-label">Sold Energy Prog.</div>
+            <div class="kpi-value" id="kpiSE">0.0</div>
+            <div class="kpi-sub">MWh (Cumulative)</div>
+        </div>
+        <div class="kpi-card" style="border-left-color: #17a2b8;">
+            <div class="kpi-label">Assessment Prog.</div>
+            <div class="kpi-value" id="kpiAss">0.0</div>
+            <div class="kpi-sub">Lakhs (Cumulative)</div>
+        </div>
+        <div class="kpi-card" style="border-left-color: #6f42c1;">
+            <div class="kpi-label">Realization Prog.</div>
+            <div class="kpi-value" id="kpiReal">0.0</div>
+            <div class="kpi-sub">Lakhs (Cumulative)</div>
+        </div>
+        <div class="kpi-card" style="border-left-color: #fd7e14;">
+            <div class="kpi-label">Avg Efficiency</div>
+            <div class="kpi-value" id="kpiBE">0.00%</div>
+            <div class="kpi-sub" id="kpiLL">Line Loss: 0.00%</div>
+        </div>
+    </div>
+
+    <div class="table-card">
+        <div class="filter-bar">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 Search by Feeder, Substation, Division, Circle, Zone, or Discom...">
+            </div>
+            <div class="filter-controls">
+                <select id="discomFilter">
+                    <option value="">All Discoms</option>
+                    <option value="DVVNL">DVVNL (Dakshinanchal)</option>
+                    <option value="MVVNL">MVVNL (Madhyanchal)</option>
+                    <option value="PVVNL">PVVNL (Paschimanchal)</option>
+                    <option value="PUVVNL">PUVVNL (Poorvanchal)</option>
+                    <option value="KESCO">KESCO</option>
+                </select>
+                <select id="pageSizeSelect">
+                    <option value="50">50 rows</option>
+                    <option value="100">100 rows</option>
+                    <option value="250">250 rows</option>
+                    <option value="500">500 rows</option>
+                    <option value="1000">1,000 rows</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="text-left">#</th>
+                        <th class="text-left">Discom</th>
+                        <th class="text-left">Zone</th>
+                        <th class="text-left">Circle</th>
+                        <th class="text-left">Division</th>
+                        <th class="text-left">Substation</th>
+                        <th class="text-left">Outgoing Feeder</th>
+                        <th class="text-left">Project Area</th>
+                        <th class="text-left">Feeder Nature</th>
+                        <th>Input Energy Prog.</th>
+                        <th>Sold Energy Prog.</th>
+                        <th>Assessment Prog.</th>
+                        <th>Realization Prog.</th>
+                        <th>Billing Eff.</th>
+                        <th>Collection Eff.</th>
+                        <th>Line Loss</th>
+                        <th>AT&C Loss</th>
+                        <th>Line Loss Slab</th>
+                        <th>AT&C Loss Slab</th>
+                        <th>I.E August</th>
+                        <th>Aug Billable</th>
+                        <th>SE August</th>
+                        <th>ASS August</th>
+                        <th>Real August</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="24" style="text-align:center; padding:30px; color:#6c757d;">Loading feeder audit data from PostgreSQL...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination">
+            <div id="pageInfo">Showing 0 to 0 of 0 entries</div>
+            <div class="page-buttons" id="pageButtons"></div>
+        </div>
+    </div>
+
+    <script>
+        const slugMap = {
+            '0% to 5%': '0_to_5_pct',
+            '5% to 10%': '5_to_10_pct',
+            '10% to 20%': '10_to_20_pct',
+            '20% to 30%': '20_to_30_pct',
+            '30% to 50%': '30_to_50_pct',
+            '50% to 70%': '50_to_70_pct',
+            'Above 70%': 'Above_70_pct',
+            'Abnormal': 'Abnormal',
+            'IE 0': 'IE_0',
+            'No Cons': 'No_Cons'
+        };
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const lossType = urlParams.get('type') || 'line_loss';
+        const slabParam = urlParams.get('slab') || '30% to 50%';
+        const slug = slugMap[slabParam] || '30_to_50_pct';
+        const lossTypeTitle = (lossType === 'atc_loss') ? 'AT&C Loss' : 'Line Loss';
+
+        let currentPage = 1;
+        let pageSize = 50;
+        let searchDebounceTimer = null;
+
+        // Set static fallback Excel export link
+        const excelPrefix = (lossType === 'atc_loss') ? 'ATC_Loss' : 'Line_Loss';
+        document.getElementById('btnExcel').href = `Slab_Excel_Exports/${excelPrefix}_${slug}.xlsx`;
+        document.getElementById('btnExcel').download = `${excelPrefix}_${slug}.xlsx`;
+
+        // Update header texts
+        document.title = `${lossTypeTitle} Slab: ${slabParam} - Feeder Audit Data`;
+        document.getElementById('pageTitle').textContent = `UPPCL 11KV Feeder Audit Data — ${lossTypeTitle} Slab: ${slabParam}`;
+        document.getElementById('kpiSlabName').textContent = `${lossTypeTitle}: ${slabParam}`;
+
+        // Fetch Drilldown KPIs dynamically
+        async function fetchDrilldownKpis() {
+            const discom = document.getElementById('discomFilter').value;
+            const search = document.getElementById('searchInput').value.trim();
+            
+            const url = `/api/psr/drilldown/kpis?type=${encodeURIComponent(lossType)}&slab=${encodeURIComponent(slabParam)}&discom=${encodeURIComponent(discom)}&search=${encodeURIComponent(search)}`;
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('KPI API returned ' + res.status);
+                const json = await res.json();
+                if (!json.success || !json.data) throw new Error('Malformed KPI response');
+
+                const data = json.data;
+                document.getElementById('kpiFeeders').textContent = data.feeder_count.toLocaleString();
+                document.getElementById('pageSub').textContent = `Detailed Audit Data for ${data.feeder_count.toLocaleString()} Feeders | ${lossTypeTitle} in ${slabParam}`;
+
+                document.getElementById('kpiIE').textContent = data.tot_ie.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+                document.getElementById('kpiSE').textContent = data.tot_se.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+                document.getElementById('kpiAss').textContent = data.tot_ass.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+                document.getElementById('kpiReal').textContent = data.tot_real.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+
+                document.getElementById('kpiBE').textContent = `${data.be_overall}%`;
+                document.getElementById('kpiLL').textContent = `${lossType === 'line_loss' ? 'Line Loss: ' + data.ll_overall + '%' : 'AT&C Loss: ' + data.atc_overall + '%'}`;
+            } catch (err) {
+                console.warn('Drilldown KPI API unavailable, attempting static fallback...');
+                loadStaticFallback();
+            }
+        }
+
+        // Fetch Paginated Feeder Data from PostgreSQL
+        async function fetchFeederData() {
+            const discom = document.getElementById('discomFilter').value;
+            const search = document.getElementById('searchInput').value.trim();
+            const tbody = document.getElementById('tableBody');
+
+            // Update Dynamic CSV Download Link
+            const csvDownloadUrl = `/api/psr/feeders/download?type=${encodeURIComponent(lossType)}&slab=${encodeURIComponent(slabParam)}&discom=${encodeURIComponent(discom)}&search=${encodeURIComponent(search)}`;
+            document.getElementById('btnCsv').href = csvDownloadUrl;
+
+            tbody.innerHTML = `<tr><td colspan="24" style="text-align:center; padding:30px; color:#6c757d;">Fetching real-time rows from PostgreSQL...</td></tr>`;
+
+            const url = `/api/psr/feeders?type=${encodeURIComponent(lossType)}&slab=${encodeURIComponent(slabParam)}&discom=${encodeURIComponent(discom)}&search=${encodeURIComponent(search)}&page=${currentPage}&limit=${pageSize}`;
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('Feeders API returned ' + res.status);
+                const json = await res.json();
+                if (!json.success || !json.rows) throw new Error('Malformed feeders response');
+
+                renderTableRows(json.rows, json.total, (currentPage - 1) * pageSize);
+                renderPagination(json.total, json.totalPages);
+            } catch (err) {
+                console.warn('Live API request failed, loading static fallback:', err.message);
+                loadStaticFallback();
+            }
+        }
+
+        function renderTableRows(rows, total, offset) {
+            const tbody = document.getElementById('tableBody');
+            if (!rows || rows.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="24" style="text-align:center; padding:30px; color:#6c757d;">No feeders found matching current search/filter.</td></tr>`;
+                document.getElementById('pageInfo').textContent = `Showing 0 to 0 of 0 entries`;
+                document.getElementById('pageButtons').innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            for (let i = 0; i < rows.length; i++) {
+                const r = rows[i];
+                const rowNum = offset + i + 1;
+                html += `<tr>
+                    <td class="text-left" style="color:#6c757d;">${rowNum}</td>
+                    <td class="text-left" style="font-weight:600;">${r[0]}</td>
+                    <td class="text-left">${r[1]}</td>
+                    <td class="text-left">${r[2]}</td>
+                    <td class="text-left">${r[3]}</td>
+                    <td class="text-left">${r[4]}</td>
+                    <td class="text-left" style="font-weight:600; color:#2c3e50;">${r[5]}</td>
+                    <td class="text-left">${r[6]}</td>
+                    <td class="text-left">${r[7]}</td>
+                    <td>${Number(r[8]).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+                    <td>${Number(r[9]).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+                    <td>${Number(r[10]).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+                    <td>${Number(r[11]).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+                    <td>${r[12]}</td>
+                    <td>${r[13]}</td>
+                    <td style="font-weight:600;">${r[14]}</td>
+                    <td style="font-weight:600; color:#dc3545;">${r[15]}</td>
+                    <td>${r[16]}</td>
+                    <td>${r[17]}</td>
+                    <td>${Number(r[18]).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+                    <td>${Number(r[19]).toLocaleString()}</td>
+                    <td>${Number(r[20]).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+                    <td>${Number(r[21]).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+                    <td>${Number(r[22]).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+                </tr>`;
+            }
+            tbody.innerHTML = html;
+
+            const end = Math.min(offset + rows.length, total);
+            document.getElementById('pageInfo').textContent = `Showing ${offset + 1} to ${end} of ${total.toLocaleString()} entries`;
+        }
+
+        function renderPagination(total, totalPages) {
+            const container = document.getElementById('pageButtons');
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let btnHtml = '';
+            btnHtml += `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(1)">«</button>`;
+            btnHtml += `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">‹</button>`;
+
+            const maxButtons = 5;
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+            if (endPage - startPage < maxButtons - 1) {
+                startPage = Math.max(1, endPage - maxButtons + 1);
+            }
+
+            for (let p = startPage; p <= endPage; p++) {
+                btnHtml += `<button class="page-btn ${p === currentPage ? 'active' : ''}" onclick="goToPage(${p})">${p}</button>`;
+            }
+
+            btnHtml += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">›</button>`;
+            btnHtml += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${totalPages})">»</button>`;
+            container.innerHTML = btnHtml;
+        }
+
+        function goToPage(p) {
+            currentPage = p;
+            fetchFeederData();
+            document.querySelector('.table-container').scrollTop = 0;
+        }
+
+        // Static script fallback if accessed outside backend
+        function loadStaticFallback() {
+            const prefix = (lossType === 'atc_loss') ? 'atc_loss' : 'line_loss';
+            const dataScriptPath = `slab_data/${prefix}_${slug}.js`;
+            const s = document.createElement('script');
+            s.src = dataScriptPath;
+            s.onload = function() {
+                if (window.CURRENT_SLAB_DATA) {
+                    const data = window.CURRENT_SLAB_DATA;
+                    document.getElementById('kpiFeeders').textContent = data.feeder_count.toLocaleString();
+                    document.getElementById('kpiIE').textContent = data.tot_ie.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+                    document.getElementById('kpiSE').textContent = data.tot_se.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+                    document.getElementById('kpiAss').textContent = data.tot_ass.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+                    document.getElementById('kpiReal').textContent = data.tot_real.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+                    document.getElementById('kpiBE').textContent = `${data.be_overall}%`;
+                    document.getElementById('kpiLL').textContent = `${lossType === 'line_loss' ? 'Line Loss: ' + data.ll_overall + '%' : 'AT&C Loss: ' + data.atc_overall + '%'}`;
+
+                    const start = (currentPage - 1) * pageSize;
+                    const pageRows = data.rows.slice(start, start + pageSize);
+                    renderTableRows(pageRows, data.rows.length, start);
+                    renderPagination(data.rows.length, Math.ceil(data.rows.length / pageSize));
+                }
+            };
+            document.head.appendChild(s);
+        }
+
+        // Filter and Search event handlers
+        document.getElementById('searchInput').addEventListener('input', function() {
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(() => {
+                currentPage = 1;
+                fetchDrilldownKpis();
+                fetchFeederData();
+            }, 300);
+        });
+
+        document.getElementById('discomFilter').addEventListener('change', function() {
+            currentPage = 1;
+            fetchDrilldownKpis();
+            fetchFeederData();
+        });
+
+        document.getElementById('pageSizeSelect').addEventListener('change', function() {
+            pageSize = parseInt(this.value, 10);
+            currentPage = 1;
+            fetchFeederData();
+        });
+
+        // Initialize Page
+        fetchDrilldownKpis();
+        fetchFeederData();
+    </script>
+</body>
+</html>
