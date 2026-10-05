@@ -821,6 +821,18 @@ let state = {
   summaryData: []
 };
 
+// ── Discom normalization helper ──
+function normalizeDiscom(d) {
+  if (!d) return '';
+  const u = d.trim().toUpperCase();
+  if (u === 'PVVNL') return 'PASCHIMANCHAL';
+  if (u === 'DVVNL') return 'DAKSHINANCHAL';
+  if (u === 'MVVNL') return 'MADHYANCHAL';
+  if (u === 'PUVVNL') return 'POORVANCHAL';
+  if (u === 'KESCO') return 'KESCO';
+  return u;
+}
+
 // ── Number Formatters ──
 function fmt(n, decimals = 0) {
   if (n === null || n === undefined || isNaN(n)) return '—';
@@ -986,10 +998,10 @@ async function loadSlabs() {
     }
     state.slabsData = data;
 
-    chartLineLoss.data.datasets[0].data = json.data.lineLoss;
+    chartLineLoss.data.datasets[0].data = data.lineLoss;
     chartLineLoss.update();
 
-    chartAtcLoss.data.datasets[0].data = json.data.atcLoss;
+    chartAtcLoss.data.datasets[0].data = data.atcLoss;
     chartAtcLoss.update();
 
     renderHBar();
@@ -1100,8 +1112,9 @@ async function loadSummary() {
     } catch {
       const res = await fetch('data/summary.json');
       const allData = await res.json();
-      if (state.discom) {
-        data = allData.filter(r => r.discom && r.discom.toUpperCase().includes(state.discom.toUpperCase()));
+      const targetDiscom = normalizeDiscom(state.discom);
+      if (targetDiscom) {
+        data = allData.filter(r => r.discom && r.discom.toUpperCase().includes(targetDiscom));
       } else {
         data = allData;
       }
