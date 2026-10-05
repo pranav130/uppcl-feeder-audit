@@ -71,9 +71,8 @@ body {
   line-height: 1.45;
 }
 
-/* Page container: exact page-fit max-width, no horizontal stretching */
 .wrap {
-  max-width: 1320px;
+  max-width: 1400px;
   margin: 0 auto;
   padding-inline: 20px;
   padding-block: 16px 48px;
@@ -81,7 +80,6 @@ body {
   gap: 16px;
 }
 
-/* ── Header ── */
 header {
   display: flex;
   flex-wrap: wrap;
@@ -93,7 +91,6 @@ header {
 h1 {
   font-size: 20px;
   font-weight: 700;
-  margin: 0;
   letter-spacing: -0.01em;
   display: flex;
   align-items: center;
@@ -162,7 +159,6 @@ h1 {
   font-size: 14px;
 }
 
-/* ── Panel standard ── */
 .panel {
   background: var(--surface);
   border: 1px solid var(--line);
@@ -190,16 +186,23 @@ h2 {
 }
 
 /* ── Sticky Filter Bar ── */
-.filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 14px;
-  align-items: flex-end;
+.filters-container {
   position: sticky;
   top: 0;
   z-index: 50;
   background: var(--surface);
-  box-shadow: 0 1px 0 var(--line);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  padding: 12px 16px;
+  display: grid;
+  gap: 10px;
+}
+.filters-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: flex-end;
 }
 .f {
   display: grid;
@@ -215,19 +218,56 @@ h2 {
 }
 select, input[type=search] {
   font: inherit;
-  font-size: 13px;
+  font-size: 12.5px;
   color: var(--ink);
   background: var(--surface);
   border: 1px solid var(--line-2);
   border-radius: 6px;
-  padding: 6px 9px;
-  min-width: 130px;
-  max-width: 200px;
+  padding: 5px 8px;
+  min-width: 120px;
 }
 select:focus-visible, input:focus-visible, button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
+
+/* Leave out feeders checkbox section */
+.leave-out-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--line);
+  font-size: 12px;
+}
+.leave-out-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  color: var(--ink-2);
+  font-weight: 500;
+}
+.checkbox-group input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+.checkbox-group:hover {
+  color: var(--ink);
+}
+
 .chips {
   display: flex;
   flex-wrap: wrap;
@@ -257,13 +297,13 @@ select:focus-visible, input:focus-visible, button:focus-visible {
   color: var(--ink-2);
 }
 
-/* ── 10 KPI Cards (2 rows of 5) ── */
+/* ── 12 Headline KPI Cards (2 rows of 6) ── */
 .kpis {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 10px;
 }
-@media (max-width: 960px) {
+@media (max-width: 1100px) {
   .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (max-width: 640px) {
@@ -273,7 +313,7 @@ select:focus-visible, input:focus-visible, button:focus-visible {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 10px;
-  padding: 11px 13px;
+  padding: 10px 12px;
   display: grid;
   gap: 2px;
   align-content: start;
@@ -288,7 +328,7 @@ select:focus-visible, input:focus-visible, button:focus-visible {
   background: var(--kpi-col, var(--line-2));
 }
 .kpi .lab {
-  font-size: 11px;
+  font-size: 10.5px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--ink-3);
@@ -296,7 +336,7 @@ select:focus-visible, input:focus-visible, button:focus-visible {
 }
 .kpi .v {
   font-family: var(--mono);
-  font-size: 21px;
+  font-size: 20px;
   font-weight: 600;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
@@ -320,7 +360,7 @@ select:focus-visible, input:focus-visible, button:focus-visible {
   color: var(--ink);
 }
 
-/* ── Pill indicators ── */
+/* ── Pills ── */
 .pill {
   display: inline-block;
   border-radius: 999px;
@@ -344,23 +384,23 @@ select:focus-visible, input:focus-visible, button:focus-visible {
 }
 .chart-box {
   position: relative;
-  height: 200px;
+  height: 220px;
   width: 100%;
 }
 
-/* ── Horizontal Bar Chart (SVG style) ── */
+/* ── Horizontal Bar Chart ── */
 .bar-chart {
   display: grid;
-  gap: 5px;
-  margin-top: 4px;
+  gap: 6px;
+  margin-top: 6px;
 }
 .bar-row {
   display: grid;
-  grid-template-columns: 120px 1fr 60px;
+  grid-template-columns: 140px 1fr 100px;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   cursor: pointer;
-  padding: 3px 6px;
+  padding: 4px 8px;
   border-radius: 4px;
   transition: background 0.15s ease;
 }
@@ -374,6 +414,7 @@ select:focus-visible, input:focus-visible, button:focus-visible {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-weight: 500;
 }
 .bar-track {
   background: var(--surface-2);
@@ -389,9 +430,10 @@ select:focus-visible, input:focus-visible, button:focus-visible {
 }
 .bar-cnt {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 11.5px;
   color: var(--ink-2);
   text-align: left;
+  white-space: nowrap;
 }
 
 /* ── Tables ── */
@@ -400,7 +442,7 @@ select:focus-visible, input:focus-visible, button:focus-visible {
   min-width: 0;
 }
 .scroll {
-  max-height: 500px;
+  max-height: 520px;
   overflow: auto;
 }
 table {
@@ -425,6 +467,7 @@ th {
   background: var(--surface);
   cursor: pointer;
   user-select: none;
+  z-index: 2;
 }
 th.nosort { cursor: default; }
 th:hover:not(.nosort) { color: var(--ink); }
@@ -471,7 +514,6 @@ tr.zone-row.hidden { display: none; }
   color: var(--ink-3);
 }
 
-/* ── Segment control ── */
 .seg {
   display: inline-flex;
   border: 1px solid var(--line-2);
@@ -494,7 +536,6 @@ tr.zone-row.hidden { display: none; }
   font-weight: 600;
 }
 
-/* ── Notes ── */
 .notes-toggle {
   display: flex;
   justify-content: space-between;
@@ -524,7 +565,7 @@ tr.zone-row.hidden { display: none; }
 
 @media (max-width: 640px) {
   .wrap { padding-inline: 14px; }
-  .filters { position: static; }
+  .filters-container { position: static; }
   select, input[type=search] { max-width: 100%; }
 }
 </style>
@@ -537,7 +578,7 @@ tr.zone-row.hidden { display: none; }
   <header>
     <div>
       <h1>⚡ UPPCL 11KV Feeder PSR Dashboard</h1>
-      <p class="sub">Executive Energy Audit &amp; PSR Slab Distribution · Cumulative Upto August 2026</p>
+      <p class="sub">Executive Energy Audit, PSR Slab Distribution &amp; Progressive Analytics · Upto August 2026</p>
     </div>
     <div class="header-actions">
       <span id="dbBadge" class="db-badge">● Connected (energy_db)</span>
@@ -551,35 +592,102 @@ tr.zone-row.hidden { display: none; }
     </div>
   </header>
 
-  <!-- ── STICKY FILTER BAR ── -->
-  <section class="panel filters" aria-label="Filters">
-    <div class="f">
-      <label for="fDiscom">Discom</label>
-      <select id="fDiscom">
-        <option value="">All of UPPCL</option>
-        <option value="PVVNL">PVVNL (Paschimanchal)</option>
-        <option value="DVVNL">DVVNL (Dakshinanchal)</option>
-        <option value="MVVNL">MVVNL (Madhyanchal)</option>
-        <option value="PUVVNL">PUVVNL (Poorvanchal)</option>
-        <option value="KESCO">KESCO</option>
-      </select>
+  <!-- ── CASCADING STICKY FILTER BAR WITH LEAVE-OUT CHECKBOXES ── -->
+  <section class="filters-container" aria-label="Filters">
+    <!-- Row 1: Cascading Dropdowns -->
+    <div class="filters-grid">
+      <div class="f">
+        <label for="fDiscom">Discom</label>
+        <select id="fDiscom">
+          <option value="">All of UPPCL</option>
+          <option value="PVVNL">PVVNL (Paschimanchal)</option>
+          <option value="DVVNL">DVVNL (Dakshinanchal)</option>
+          <option value="MVVNL">MVVNL (Madhyanchal)</option>
+          <option value="PUVVNL">PUVVNL (Poorvanchal)</option>
+          <option value="KESCO">KESCO</option>
+        </select>
+      </div>
+      <div class="f">
+        <label for="fZone">Zone</label>
+        <select id="fZone"><option value="">All Zones</option></select>
+      </div>
+      <div class="f">
+        <label for="fCircle">Circle</label>
+        <select id="fCircle"><option value="">All Circles</option></select>
+      </div>
+      <div class="f">
+        <label for="fDivision">Division</label>
+        <select id="fDivision"><option value="">All Divisions</option></select>
+      </div>
+      <div class="f">
+        <label for="fArea">Area</label>
+        <select id="fArea">
+          <option value="">All Areas</option>
+          <option value="RURAL">RURAL</option>
+          <option value="TEHSIL">TEHSIL</option>
+          <option value="URBAN">URBAN</option>
+        </select>
+      </div>
+      <div class="f">
+        <label for="fFeederType">Feeder Type</label>
+        <select id="fFeederType">
+          <option value="">All Feeder Types</option>
+          <option value="AGRICULTURE">AGRICULTURE</option>
+          <option value="INDEPENDENT">INDEPENDENT</option>
+          <option value="INDUSTRIAL ABOVE 75%">INDUSTRIAL ABOVE 75%</option>
+          <option value="MIXED ABOVE 25%">MIXED ABOVE 25%</option>
+          <option value="MIXED ABOVE 50%">MIXED ABOVE 50%</option>
+          <option value="SUBSTATION">SUBSTATION</option>
+          <option value="OTHER">OTHER</option>
+        </select>
+      </div>
+      <div class="f">
+        <label for="fMonthFrom">From</label>
+        <select id="fMonthFrom">
+          <option value="Apr">Apr 2026</option>
+          <option value="May">May 2026</option>
+          <option value="Jun">Jun 2026</option>
+          <option value="Jul">Jul 2026</option>
+          <option value="Aug">Aug 2026</option>
+        </select>
+      </div>
+      <div class="f">
+        <label for="fMonthTo">To</label>
+        <select id="fMonthTo">
+          <option value="Aug" selected>Aug 2026</option>
+          <option value="Jul">Jul 2026</option>
+          <option value="Jun">Jun 2026</option>
+          <option value="May">May 2026</option>
+          <option value="Apr">Apr 2026</option>
+        </select>
+      </div>
+      <div class="f">
+        <label for="fSearch">Search Feeder</label>
+        <input type="search" id="fSearch" placeholder="Feeder name or code...">
+      </div>
+      <div class="f">
+        <button class="btn" id="btnReset" type="button">✕ Reset</button>
+      </div>
     </div>
-    <div class="f">
-      <label for="fZone">Zone</label>
-      <select id="fZone"><option value="">All Zones</option></select>
-    </div>
-    <div class="f">
-      <label for="fSearch">Search Feeder / Division</label>
-      <input type="search" id="fSearch" placeholder="e.g. Noida, Industrial...">
-    </div>
-    <div class="f">
-      <button class="btn" id="btnReset" type="button">✕ Reset</button>
+
+    <!-- Row 2: Leave Out Feeders With (Interactive Exclusions) -->
+    <div class="leave-out-bar">
+      <span class="leave-out-title">Leave out feeders with:</span>
+      <label class="checkbox-group" title="Exclude feeders where assessment > ₹1 Crore AND billing rate > ₹50/kWh">
+        <input type="checkbox" id="chkAbnormal"> Abnormal Assessment
+      </label>
+      <label class="checkbox-group" title="Exclude feeders where Billed Energy exceeds Input Energy (negative line loss)">
+        <input type="checkbox" id="chkBilledGtInput"> Billed &gt; Input
+      </label>
+      <label class="checkbox-group" title="Exclude feeders with zero input energy in month">
+        <input type="checkbox" id="chkZeroInput"> A Month with Zero Input
+      </label>
     </div>
   </section>
 
   <div class="chips" id="chipRow"></div>
 
-  <!-- ── 10 KPI CARDS (2 rows of 5) ── -->
+  <!-- ── 12 HEADLINE KPI CARDS (2 rows of 6) ── -->
   <section aria-label="Headline KPIs">
     <!-- Row 1 -->
     <div class="kpis">
@@ -603,6 +711,11 @@ tr.zone-row.hidden { display: none; }
         <span class="v" id="kpiCE">—</span>
         <span class="u">% (Realised ÷ Assessed)</span>
       </div>
+      <div class="kpi" style="--kpi-col: var(--s7)">
+        <span class="lab">Line Loss</span>
+        <span class="v" id="kpiLL">—</span>
+        <span class="u">% (1 − Billing Eff)</span>
+      </div>
       <div class="kpi" style="--kpi-col: var(--crit)">
         <span class="lab">AT&amp;C Loss</span>
         <span class="v" id="kpiATC" style="color:var(--crit)">—</span>
@@ -611,15 +724,20 @@ tr.zone-row.hidden { display: none; }
     </div>
     <!-- Row 2 -->
     <div class="kpis" style="margin-top: 10px;">
-      <div class="kpi" style="--kpi-col: var(--s7)">
-        <span class="lab">Line Loss</span>
-        <span class="v" id="kpiLL">—</span>
-        <span class="u">% (1 − Billing Eff)</span>
-      </div>
       <div class="kpi" style="--kpi-col: var(--accent)">
         <span class="lab">Average Billing Rate</span>
         <span class="v" id="kpiABR">—</span>
         <span class="u">₹ / kWh (ABR)</span>
+      </div>
+      <div class="kpi" style="--kpi-col: var(--s3)">
+        <span class="lab">Thru Rate</span>
+        <span class="v" id="kpiThru" style="color:var(--good)">—</span>
+        <span class="u">₹ / kWh (Realised ÷ Input)</span>
+      </div>
+      <div class="kpi" style="--kpi-col: var(--warn)">
+        <span class="lab">Loss Per Unit Input</span>
+        <span class="v" id="kpiLossPerUnit" style="color:var(--warn)">—</span>
+        <span class="u">₹ / kWh Input</span>
       </div>
       <div class="kpi" style="--kpi-col: var(--s3)">
         <span class="lab">Amount Assessed</span>
@@ -644,6 +762,67 @@ tr.zone-row.hidden { display: none; }
       <span>IE = 0: <b id="cntIeZero">233</b></span>
       <span>No Consumers Tagged: <b id="cntNoCons">1,515</b></span>
       <span style="margin-left:auto;color:var(--ink-3);font-family:var(--mono);" id="refreshTs"></span>
+    </div>
+  </section>
+
+  <!-- ── MONTHLY TREND CHARTS (Input vs Billed & Loss Trend Apr-Aug) ── -->
+  <div class="grid2">
+    <section class="panel">
+      <div class="ph">
+        <div>
+          <h2>📊 Input vs Billed Energy by Month</h2>
+          <p class="hint">Monthly energy comparison (MU) across April–August 2026</p>
+        </div>
+        <span class="pill p-good" style="font-size:11px;">Apr–Aug 2026</span>
+      </div>
+      <div class="chart-box">
+        <canvas id="chartMonthlyEnergy"></canvas>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="ph">
+        <div>
+          <h2>📈 Loss Trend by Month</h2>
+          <p class="hint">Line Loss % vs AT&amp;C Loss % trend across April–August 2026</p>
+        </div>
+        <span class="pill p-warn" style="font-size:11px;">Apr–Aug 2026</span>
+      </div>
+      <div class="chart-box">
+        <canvas id="chartMonthlyLoss"></canvas>
+      </div>
+    </section>
+  </div>
+
+  <!-- ── BY DISCOM SUMMARY TABLE (NEW) ── -->
+  <section class="panel">
+    <div class="ph">
+      <div>
+        <h2>🏢 By Discom Summary</h2>
+        <p class="hint">Comparative progressive performance across all 5 distribution companies</p>
+      </div>
+    </div>
+    <div class="tw">
+      <table id="tblByDiscom">
+        <thead>
+          <tr>
+            <th class="tx nosort">Name</th>
+            <th>Feeders</th>
+            <th>Input MU</th>
+            <th>Billed MU</th>
+            <th>Billing Eff.</th>
+            <th>Collection Eff.</th>
+            <th>AT&amp;C Loss</th>
+            <th>ABR ₹/kWh</th>
+            <th>Thru Rate ₹/kWh</th>
+            <th>Realised ₹Cr</th>
+            <th>AT&amp;C Loss Value ₹Cr</th>
+          </tr>
+        </thead>
+        <tbody id="byDiscomBody">
+          <tr><td colspan="11" style="text-align:center;padding:16px;color:var(--ink-3)">Loading Discom summary...</td></tr>
+        </tbody>
+      </table>
     </div>
   </section>
 
@@ -676,22 +855,40 @@ tr.zone-row.hidden { display: none; }
     </section>
   </div>
 
-  <!-- ── HORIZONTAL SVG SLAB DISTRIBUTION ── -->
-  <section class="panel">
-    <div class="ph">
-      <div>
-        <h2>🔴 AT&amp;C Loss Slab Breakdown</h2>
-        <p class="hint">Distribution of audited feeders across loss slabs. Click any row to view feeder details.</p>
+  <!-- ── HORIZONTAL BREAKDOWNS: SLAB & FEEDER TYPE ── -->
+  <div class="grid2">
+    <!-- AT&C Loss Slab Horizontal Bar -->
+    <section class="panel">
+      <div class="ph">
+        <div>
+          <h2>🔴 Feeders by AT&amp;C Loss Slab</h2>
+          <p class="hint">Distribution of audited feeders across loss slabs</p>
+        </div>
+        <div class="seg" role="group">
+          <button type="button" data-hbar="atc" aria-pressed="true">AT&amp;C</button>
+          <button type="button" data-hbar="line" aria-pressed="false">Line</button>
+        </div>
       </div>
-      <div class="seg" role="group">
-        <button type="button" data-hbar="atc" aria-pressed="true">AT&amp;C Loss</button>
-        <button type="button" data-hbar="line" aria-pressed="false">Line Loss</button>
-      </div>
-    </div>
-    <div class="bar-chart" id="hBarContainer"></div>
-  </section>
+      <div class="bar-chart" id="hBarContainer"></div>
+    </section>
 
-  <!-- ── WORST 10 FEEDERS PANEL ── -->
+    <!-- AT&C Loss by Feeder Type / Area (NEW) -->
+    <section class="panel">
+      <div class="ph">
+        <div>
+          <h2>⚡ AT&amp;C Loss by Category</h2>
+          <p class="hint">Toggle between Feeder Type (nature) and Project Area</p>
+        </div>
+        <div class="seg" role="group">
+          <button type="button" data-ft-toggle="feederType" aria-pressed="true">Feeder Type</button>
+          <button type="button" data-ft-toggle="area" aria-pressed="false">Area</button>
+        </div>
+      </div>
+      <div class="bar-chart" id="feederTypeBarContainer"></div>
+    </section>
+  </div>
+
+  <!-- ── WORST 10 FEEDERS PANEL (>70% Slab) ── -->
   <section class="panel">
     <div class="ph">
       <div>
@@ -714,7 +911,41 @@ tr.zone-row.hidden { display: none; }
           </tr>
         </thead>
         <tbody id="wfTableBody">
-          <tr><td colspan="8" style="text-align:center;padding:16px;color:var(--ink-3)">Loading worst feeders from PostgreSQL...</td></tr>
+          <tr><td colspan="8" style="text-align:center;padding:16px;color:var(--ink-3)">Loading worst feeders...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── TOP 150 FEEDERS WITH LARGEST AT&C LOSS VALUE (NEW) ── -->
+  <section class="panel">
+    <div class="ph">
+      <div>
+        <h2>🔥 Feeders with the Largest AT&amp;C Loss Value</h2>
+        <p class="hint">Top 150 feeders ranked by financial loss value in ₹ Crore (Input Energy × ABR × AT&amp;C Loss %)</p>
+      </div>
+      <span class="pill p-crit" id="top150CountBadge">Top 150 Feeders</span>
+    </div>
+    <div class="tw scroll">
+      <table id="top150Table">
+        <thead>
+          <tr>
+            <th class="tx nosort">#</th>
+            <th class="tx nosort">Division</th>
+            <th class="tx nosort">Substation</th>
+            <th class="tx nosort">Feeder</th>
+            <th class="tx nosort">Type</th>
+            <th>Input MU</th>
+            <th>Billing Eff.</th>
+            <th>Collection Eff.</th>
+            <th>AT&amp;C Loss</th>
+            <th>ABR ₹/kWh</th>
+            <th>Thru Rate</th>
+            <th>Loss Value ₹Cr</th>
+          </tr>
+        </thead>
+        <tbody id="top150Body">
+          <tr><td colspan="12" style="text-align:center;padding:20px;color:var(--ink-3)">Loading Top 150 AT&amp;C Loss Feeders...</td></tr>
         </tbody>
       </table>
     </div>
@@ -763,7 +994,7 @@ tr.zone-row.hidden { display: none; }
           </tr>
         </thead>
         <tbody id="summaryTableBody">
-          <tr><td colspan="21" style="text-align:center;padding:24px;color:var(--ink-3)">Loading summary from PostgreSQL...</td></tr>
+          <tr><td colspan="21" style="text-align:center;padding:24px;color:var(--ink-3)">Loading summary...</td></tr>
         </tbody>
       </table>
     </div>
@@ -776,10 +1007,10 @@ tr.zone-row.hidden { display: none; }
       <span id="notesArrow">▼</span>
     </button>
     <div class="notes-body open" id="notesBody">
-      <p><b>1. Multiplicative AT&amp;C Formula:</b> AT&amp;C Loss is mathematically calculated as <code>100% − (Billing Efficiency × Collection Efficiency)</code>. It is strictly multiplicative, not additive.</p>
-      <p><b>2. Energy &amp; Financial Units:</b> Input and Sold Energy are stored in MWh in PostgreSQL and displayed in MU (Million Units = 1,000 MWh). Assessment and Realisation are stored in ₹ Lakhs and displayed in ₹ Crore (100 Lakhs = 1 Crore).</p>
-      <p><b>3. Average Billing Rate (ABR):</b> Calculated as <code>Total Assessment (₹) ÷ Total Sold Energy (kWh)</code>. Statewide average is ₹43.32/kWh.</p>
-      <p><b>4. Excluded Categories:</b> Feeders with zero input energy (233) or no consumers tagged in August (1,515) are tracked in the baseline network but excluded from active audit slabs.</p>
+      <p><b>1. Multiplicative AT&amp;C Formula:</b> AT&amp;C Loss is mathematically calculated as <code>100% − (Billing Efficiency × Collection Efficiency)</code>.</p>
+      <p><b>2. Thru Rate vs ABR:</b> <b>ABR</b> (Average Billing Rate) = <code>Assessment ÷ Sold Energy</code>. <b>Thru Rate</b> = <code>Realised Amount ÷ Input Energy</code>, indicating actual cash realized per unit wheeled.</p>
+      <p><b>3. Leave-out Filters:</b> Abnormal Assessment excludes feeders with assessment &gt; ₹1 Crore and ABR &gt; ₹50/unit. Billed &gt; Input removes feeders with negative line loss. Zero input leaves out feeders without metering in August.</p>
+      <p><b>4. Units:</b> Energy in MU (Million Units = 1,000 MWh). Financial amounts in ₹ Crore (100 Lakhs = 1 Crore). Rates in ₹/kWh.</p>
     </div>
   </section>
 
@@ -803,25 +1034,47 @@ tr.zone-row.hidden { display: none; }
     document.documentElement.setAttribute('data-theme', next);
     localStorage.setItem('theme', next);
     toggleBtn.textContent = next === 'dark' ? '☀️' : '🌙';
-    updateChartTheme();
+    updateAllChartThemes();
   });
 })();
+
+// ── HARDCODED 5-MONTH DATA (April to August 2026 from Excel) ──
+const MONTHLY_TREND_DATA = {
+  months: ['April', 'May', 'June', 'July', 'August'],
+  inputMu:  [10780.6, 13300.9, 15061.2, 14872.6, 14153.6],
+  billedMu: [7478.7,  7590.8,  8833.3,  10192.5, 8390.2],
+  lineLoss: [30.6,    42.9,    41.4,    31.5,    40.7],
+  atcLoss:  [86.5,    92.2,    96.5,    90.6,    61.5]
+};
 
 // ── State ──
 let state = {
   discom: '',
   zone: '',
+  circle: '',
+  division: '',
+  area: '',
+  feederType: '',
+  monthFrom: 'Apr',
+  monthTo: 'Aug',
   search: '',
   tableSearch: '',
+  excludeAbnormal: false,
+  excludeBilledGtInput: false,
+  excludeZeroInput: false,
   sortCol: null,
   sortDir: 1,
   collapsedDiscoms: new Set(),
   hBarType: 'atc',
+  ftBarGroup: 'feederType',
   slabsData: null,
-  summaryData: []
+  summaryData: [],
+  discomSummaryData: [],
+  feederTypeData: { feederType: [], area: [] },
+  top150Data: []
 };
 
-// ── Discom normalization helper ──
+// ── Helpers ──
 function normalizeDiscom(d) {
   if (!d) return '';
   const u = d.trim().toUpperCase();
@@ -833,7 +1086,6 @@ function normalizeDiscom(d) {
   return u;
 }
 
-// ── Number Formatters ──
 function fmt(n, decimals = 0) {
   if (n === null || n === undefined || isNaN(n)) return '—';
   return Number(n).toLocaleString('en-IN', {
@@ -850,6 +1102,14 @@ function lossPill(val, isLine = true) {
   return `<span class="pill ${cls}">${v.toFixed(1)}%</span>`;
 }
 
+function thruRatePill(val) {
+  const v = parseFloat(val);
+  if (isNaN(v)) return `—`;
+  // Above Rs4 is good (green), 3-4 is moderate (orange), below 3 is poor (red)
+  const cls = v >= 4 ? 'p-good' : v >= 3 ? 'p-warn' : 'p-crit';
+  return `<span class="pill ${cls}">₹${v.toFixed(2)}</span>`;
+}
+
 const SLAB_COLORS = {
   '0% to 5%': '#1d7a3e',
   '5% to 10%': '#1baf7a',
@@ -862,6 +1122,23 @@ const SLAB_COLORS = {
   'IE 0': '#7a8494',
   'No Cons': '#b9c0cb'
 };
+
+// ── Query string builder for API calls ──
+function buildQueryString() {
+  const params = new URLSearchParams();
+  if (state.discom) params.append('discom', state.discom);
+  if (state.zone) params.append('zone', state.zone);
+  if (state.circle) params.append('circle', state.circle);
+  if (state.division) params.append('division', state.division);
+  if (state.area) params.append('area', state.area);
+  if (state.feederType) params.append('feederType', state.feederType);
+  if (state.search) params.append('search', state.search);
+  if (state.excludeAbnormal) params.append('excludeAbnormal', '1');
+  if (state.excludeBilledGtInput) params.append('excludeBilledGtInput', '1');
+  if (state.excludeZeroInput) params.append('excludeZeroInput', '1');
+  const str = params.toString();
+  return str ? `?${str}` : '';
+}
 
 // ── Health Check ──
 async function checkHealth() {
@@ -876,7 +1153,7 @@ async function checkHealth() {
     try {
       const res = await fetch('data/health.json');
       const data = await res.json();
-      badge.textContent = `● PostgreSQL Synced: ${data.database} (24/7 GitHub Hosted)`;
+      badge.textContent = `● PostgreSQL Synced: ${data.database} (GitHub Pages)`;
       badge.className = 'db-badge';
     } catch {
       badge.textContent = '● Static Data Mode';
@@ -885,12 +1162,56 @@ async function checkHealth() {
   }
 }
 
-// ── Load KPIs (Dynamically Filterable) ──
+// ── Load Cascading Dropdowns ──
+async function loadCascadeOptions() {
+  try {
+    let options;
+    try {
+      const params = new URLSearchParams();
+      if (state.discom) params.append('discom', state.discom);
+      if (state.zone) params.append('zone', state.zone);
+      if (state.circle) params.append('circle', state.circle);
+      const res = await fetch(`/api/psr/cascade?${params.toString()}`);
+      if (!res.ok) throw new Error();
+      const json = await res.json();
+      options = json.data;
+    } catch {
+      const res = await fetch('data/cascade.json');
+      options = await res.json();
+    }
+
+    // Populate Zone
+    const zoneSelect = document.getElementById('fZone');
+    const curZone = zoneSelect.value;
+    zoneSelect.innerHTML = '<option value="">All Zones</option>' +
+      (options.zones || []).map(z => `<option value="${z}">${z}</option>`).join('');
+    if (options.zones && options.zones.includes(curZone)) zoneSelect.value = curZone;
+
+    // Populate Circle
+    const circleSelect = document.getElementById('fCircle');
+    const curCircle = circleSelect.value;
+    circleSelect.innerHTML = '<option value="">All Circles</option>' +
+      (options.circles || []).map(c => `<option value="${c}">${c}</option>`).join('');
+    if (options.circles && options.circles.includes(curCircle)) circleSelect.value = curCircle;
+
+    // Populate Division
+    const divSelect = document.getElementById('fDivision');
+    const curDiv = divSelect.value;
+    divSelect.innerHTML = '<option value="">All Divisions</option>' +
+      (options.divisions || []).map(d => `<option value="${d}">${d}</option>`).join('');
+    if (options.divisions && options.divisions.includes(curDiv)) divSelect.value = curDiv;
+
+  } catch (err) {
+    console.error('Failed to load cascade options:', err);
+  }
+}
+
+// ── Load KPIs (Dynamic Filterable) ──
 async function loadKpis() {
   try {
     let d;
+    const q = buildQueryString();
     try {
-      const q = state.discom ? `?discom=${encodeURIComponent(state.discom)}` : '';
       const res = await fetch(`/api/psr/kpis${q}`);
       if (!res.ok) throw new Error();
       const json = await res.json();
@@ -907,10 +1228,12 @@ async function loadKpis() {
     document.getElementById('kpiSE').textContent = fmt(d.soldEnergyMu);
     document.getElementById('kpiBE').textContent = (d.billingEfficiency || 0).toFixed(1) + '%';
     document.getElementById('kpiCE').textContent = (d.collectionEfficiency || 0).toFixed(1) + '%';
+    document.getElementById('kpiLL').textContent = (d.lineLoss || 0).toFixed(1) + '%';
     document.getElementById('kpiATC').textContent = (d.atcLoss || 0).toFixed(1) + '%';
 
-    document.getElementById('kpiLL').textContent = (d.lineLoss || 0).toFixed(1) + '%';
     document.getElementById('kpiABR').textContent = fmt(d.avgBillingRate, 2);
+    document.getElementById('kpiThru').textContent = fmt(d.thruRate, 2);
+    document.getElementById('kpiLossPerUnit').textContent = fmt(d.lossPerUnit, 2);
     document.getElementById('kpiAss').textContent = fmt(d.assessmentCr);
     document.getElementById('kpiReal').textContent = fmt(d.realizationCr);
     document.getElementById('kpiALV').textContent = fmt(d.atcLossValueCr);
@@ -927,7 +1250,150 @@ async function loadKpis() {
   }
 }
 
-// ── Chart.js Setup ──
+// ── Monthly Trend Charts (Apr–Aug 2026) ──
+let chartMonthlyEnergy = null;
+let chartMonthlyLoss = null;
+
+function initMonthlyCharts() {
+  const ctxE = document.getElementById('chartMonthlyEnergy').getContext('2d');
+  chartMonthlyEnergy = new Chart(ctxE, {
+    type: 'bar',
+    data: {
+      labels: MONTHLY_TREND_DATA.months,
+      datasets: [
+        {
+          label: 'Input Energy (MU)',
+          data: MONTHLY_TREND_DATA.inputMu,
+          backgroundColor: '#2a78d6',
+          borderRadius: 4
+        },
+        {
+          label: 'Billed Energy (MU)',
+          data: MONTHLY_TREND_DATA.billedMu,
+          backgroundColor: '#eb6834',
+          borderRadius: 4
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
+        tooltip: { callbacks: { label: (c) => ` ${c.dataset.label}: ${c.raw.toLocaleString('en-IN')} MU` } }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+        y: { grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { font: { size: 11 } } }
+      }
+    }
+  });
+
+  const ctxL = document.getElementById('chartMonthlyLoss').getContext('2d');
+  chartMonthlyLoss = new Chart(ctxL, {
+    type: 'line',
+    data: {
+      labels: MONTHLY_TREND_DATA.months,
+      datasets: [
+        {
+          label: 'AT&C Loss %',
+          data: MONTHLY_TREND_DATA.atcLoss,
+          borderColor: '#b3261e',
+          backgroundColor: 'rgba(179,38,30,0.1)',
+          fill: true,
+          tension: 0.3,
+          borderWidth: 2.5,
+          pointRadius: 4
+        },
+        {
+          label: 'Line Loss %',
+          data: MONTHLY_TREND_DATA.lineLoss,
+          borderColor: '#4a3aa7',
+          backgroundColor: 'transparent',
+          tension: 0.3,
+          borderWidth: 2,
+          borderDash: [5, 5],
+          pointRadius: 3
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
+        tooltip: { callbacks: { label: (c) => ` ${c.dataset.label}: ${c.raw.toFixed(1)}%` } }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+        y: {
+          grid: { color: 'rgba(0,0,0,0.06)' },
+          ticks: { font: { size: 11 }, callback: v => v + '%' },
+          min: 0,
+          max: 100
+        }
+      }
+    }
+  });
+}
+
+// ── By Discom Summary Table (NEW) ──
+async function loadByDiscomSummary() {
+  const tbody = document.getElementById('byDiscomBody');
+  try {
+    let rows;
+    const q = buildQueryString();
+    try {
+      const res = await fetch(`/api/psr/discom-summary${q}`);
+      if (!res.ok) throw new Error();
+      const json = await res.json();
+      rows = json.data;
+    } catch {
+      const res = await fetch('data/discom_summary.json');
+      rows = await res.json();
+    }
+    state.discomSummaryData = rows;
+
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:16px;color:var(--ink-3)">No data available for current selection.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = rows.map(r => `
+      <tr class="drill" onclick="filterByDiscomName('${r.discom}')" title="Click to filter by ${r.discom}">
+        <td class="tx" style="font-weight:600;color:var(--accent);">${r.discom}</td>
+        <td>${fmt(r.feeders)}</td>
+        <td>${fmt(r.inputMu, 1)}</td>
+        <td>${fmt(r.billedMu, 1)}</td>
+        <td>${fmt(r.billingEff, 1)}%</td>
+        <td>${fmt(r.collectionEff, 1)}%</td>
+        <td>${lossPill(r.atcLoss, false)}</td>
+        <td>₹${fmt(r.abr, 2)}</td>
+        <td>${thruRatePill(r.thruRate)}</td>
+        <td>₹${fmt(r.realisedCr, 1)}</td>
+        <td style="font-weight:600;color:var(--crit);">₹${fmt(r.atcLossValueCr, 1)}</td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    console.error('Failed to load discom summary:', err);
+    tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:16px;color:var(--ink-3)">Failed to load data.</td></tr>`;
+  }
+}
+
+window.filterByDiscomName = function(dName) {
+  let mapped = dName;
+  if (dName.includes('PASCHIM')) mapped = 'PVVNL';
+  else if (dName.includes('DAKSHIN')) mapped = 'DVVNL';
+  else if (dName.includes('MADHYA')) mapped = 'MVVNL';
+  else if (dName.includes('POORV') || dName.includes('PURV')) mapped = 'PUVVNL';
+  else if (dName.includes('KESCO')) mapped = 'KESCO';
+
+  document.getElementById('fDiscom').value = mapped;
+  state.discom = mapped;
+  onFilterChanged();
+};
+
+// ── Slabs & Chart.js ──
 const slabLabels = ['0% to 5%', '5% to 10%', '10% to 20%', '20% to 30%', '30% to 50%', '50% to 70%', 'Above 70%', 'Abnormal', 'IE 0', 'No Cons'];
 
 function createChart(ctx, color, typeKey) {
@@ -946,11 +1412,7 @@ function createChart(ctx, color, typeKey) {
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
-        tooltip: {
-          callbacks: {
-            afterLabel: () => '👉 Click to drill down into feeders'
-          }
-        }
+        tooltip: { callbacks: { afterLabel: () => '👉 Click to drill down into feeders' } }
       },
       scales: {
         x: { grid: { display: false }, ticks: { font: { size: 10.5 } } },
@@ -970,15 +1432,21 @@ function createChart(ctx, color, typeKey) {
 const chartLineLoss = createChart(document.getElementById('chartLineLoss'), '#2a78d6', 'line_loss');
 const chartAtcLoss = createChart(document.getElementById('chartAtcLoss'), '#eb6834', 'atc_loss');
 
-function updateChartTheme() {
+function updateAllChartThemes() {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   const gridCol = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
   const textCol = isDark ? '#8791a0' : '#7a8494';
 
-  [chartLineLoss, chartAtcLoss].forEach(c => {
-    c.options.scales.x.ticks.color = textCol;
-    c.options.scales.y.ticks.color = textCol;
-    c.options.scales.y.grid.color = gridCol;
+  [chartLineLoss, chartAtcLoss, chartMonthlyEnergy, chartMonthlyLoss].forEach(c => {
+    if (!c) return;
+    if (c.options.scales.x) {
+      c.options.scales.x.ticks.color = textCol;
+      c.options.scales.x.grid.color = gridCol;
+    }
+    if (c.options.scales.y) {
+      c.options.scales.y.ticks.color = textCol;
+      c.options.scales.y.grid.color = gridCol;
+    }
     c.update();
   });
 }
@@ -990,7 +1458,6 @@ async function loadSlabs() {
       const res = await fetch('/api/psr/slabs');
       if (!res.ok) throw new Error();
       const json = await res.json();
-      if (!json.success) throw new Error();
       data = json.data;
     } catch {
       const res = await fetch('data/slabs.json');
@@ -1010,7 +1477,7 @@ async function loadSlabs() {
   }
 }
 
-// ── Horizontal Bar Chart ──
+// ── Horizontal Slab Distribution Bar ──
 function renderHBar() {
   if (!state.slabsData) return;
   const container = document.getElementById('hBarContainer');
@@ -1046,7 +1513,63 @@ document.querySelectorAll('[data-hbar]').forEach(btn => {
   });
 });
 
-// ── Worst 10 Feeders ──
+// ── AT&C Loss by Feeder Type / Area Horizontal Bar (NEW) ──
+async function loadFeederTypeBreakdown() {
+  const container = document.getElementById('feederTypeBarContainer');
+  try {
+    let dataset;
+    const q = buildQueryString();
+    const groupByParam = state.ftBarGroup === 'area' ? 'area' : 'feederType';
+    const queryWithGroup = q ? `${q}&groupBy=${groupByParam}` : `?groupBy=${groupByParam}`;
+
+    try {
+      const res = await fetch(`/api/psr/feeder-type-breakdown${queryWithGroup}`);
+      if (!res.ok) throw new Error();
+      const json = await res.json();
+      dataset = json.data;
+    } catch {
+      const res = await fetch('data/feeder_type_breakdown.json');
+      const all = await res.json();
+      dataset = all[state.ftBarGroup] || all.feederType;
+    }
+
+    if (!dataset || !dataset.length) {
+      container.innerHTML = `<div style="text-align:center;padding:16px;color:var(--ink-3)">No category data.</div>`;
+      return;
+    }
+
+    const maxLoss = 100;
+    container.innerHTML = dataset.map(item => {
+      const loss = item.atcLoss || 0;
+      const widthPct = Math.min(100, Math.max(2, loss));
+      const color = loss < 20 ? 'var(--good)' : loss < 50 ? 'var(--warn)' : 'var(--crit)';
+
+      return `
+        <div class="bar-row" style="grid-template-columns: 160px 1fr 110px;">
+          <div class="bar-lbl" title="${item.category}">${item.category}</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:${widthPct}%;background:${color};"></div>
+          </div>
+          <div class="bar-cnt"><b>${loss.toFixed(1)}%</b> (${fmt(item.feeders)})</div>
+        </div>
+      `;
+    }).join('');
+  } catch (err) {
+    console.error('Failed to load feeder type breakdown:', err);
+    container.innerHTML = `<div style="text-align:center;padding:16px;color:var(--ink-3)">Failed to load data.</div>`;
+  }
+}
+
+document.querySelectorAll('[data-ft-toggle]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-ft-toggle]').forEach(b => b.setAttribute('aria-pressed', 'false'));
+    btn.setAttribute('aria-pressed', 'true');
+    state.ftBarGroup = btn.getAttribute('data-ft-toggle');
+    loadFeederTypeBreakdown();
+  });
+});
+
+// ── Worst 10 Feeders Panel (>70% Slab) ──
 async function loadWorstFeeders() {
   const tbody = document.getElementById('wfTableBody');
   const discomParam = state.discom ? `&discom=${encodeURIComponent(state.discom)}` : '';
@@ -1056,8 +1579,11 @@ async function loadWorstFeeders() {
   try {
     let total = 0;
     let rows = [];
+    const q = buildQueryString();
+    const queryStr = q ? `${q}&type=atc_loss&slab=Above%2070%25&page=1&limit=10` : `?type=atc_loss&slab=Above%2070%25&page=1&limit=10`;
+
     try {
-      const res = await fetch(`/api/psr/feeders?type=atc_loss&slab=Above%2070%25&page=1&limit=10${discomParam}`);
+      const res = await fetch(`/api/psr/feeders${queryStr}`);
       if (!res.ok) throw new Error();
       const json = await res.json();
       if (!json.success || !json.rows.length) throw new Error();
@@ -1080,7 +1606,7 @@ async function loadWorstFeeders() {
     document.getElementById('wfTitleHint').innerHTML = `Top 10 of <b>${fmt(total)}</b> feeders in AT&amp;C &gt;70% slab · <a href="${viewAllUrl}" target="_blank" style="color:var(--accent);font-weight:600">View all in Feeder Explorer →</a>`;
 
     tbody.innerHTML = rows.map((r, i) => `
-      <tr class="drill" onclick="window.open('feeder_drilldown.html?type=atc_loss&slab=Above%2070%25&search=${encodeURIComponent(r[5])}${discomParam}', '_blank')">
+      <tr class="drill" onclick="window.open('feeder_drilldown.html?search=${encodeURIComponent(r[5])}', '_blank')">
         <td class="tx" style="color:var(--ink-3)">${i + 1}</td>
         <td class="tx" style="font-weight:600">${r[0]}</td>
         <td class="tx">${r[1]}</td>
@@ -1088,12 +1614,58 @@ async function loadWorstFeeders() {
         <td class="tx" style="font-weight:600;color:var(--accent)">${r[5]}</td>
         <td>${lossPill(r[14], true)}</td>
         <td>${lossPill(r[15], false)}</td>
-        <td class="tx"><a href="feeder_drilldown.html?type=atc_loss&slab=Above%2070%25&search=${encodeURIComponent(r[5])}${discomParam}" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:500;">Inspect →</a></td>
+        <td class="tx"><a href="feeder_drilldown.html?search=${encodeURIComponent(r[5])}" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:500;">Inspect →</a></td>
       </tr>
     `).join('');
   } catch (err) {
     console.error('Failed to load worst feeders:', err);
     tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:16px;color:var(--ink-3)">Failed to load data.</td></tr>`;
+  }
+}
+
+// ── Top 150 Feeders with Largest AT&C Loss Value (NEW) ──
+async function loadTop150Feeders() {
+  const tbody = document.getElementById('top150Body');
+  try {
+    let rows;
+    const q = buildQueryString();
+    try {
+      const res = await fetch(`/api/psr/top-atc-loss${q}`);
+      if (!res.ok) throw new Error();
+      const json = await res.json();
+      rows = json.data;
+    } catch {
+      const res = await fetch('data/top_atc_loss.json');
+      rows = await res.json();
+    }
+    state.top150Data = rows;
+
+    if (!rows || !rows.length) {
+      tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;padding:16px;color:var(--ink-3)">No feeders found matching selection.</td></tr>`;
+      return;
+    }
+
+    document.getElementById('top150CountBadge').textContent = `Top ${rows.length} Feeders by Loss Value`;
+
+    tbody.innerHTML = rows.map((r, i) => `
+      <tr class="drill" onclick="window.open('feeder_drilldown.html?search=${encodeURIComponent(r.feeder)}', '_blank')">
+        <td class="tx" style="color:var(--ink-3)">${i + 1}</td>
+        <td class="tx">${r.division}</td>
+        <td class="tx">${r.substation}</td>
+        <td class="tx" style="font-weight:600;color:var(--accent)">${r.feeder}</td>
+        <td class="tx"><span style="font-size:11px;color:var(--ink-2);">${r.feederType || '—'}</span></td>
+        <td>${fmt(r.inputMu, 2)}</td>
+        <td>${fmt(r.billingEff, 1)}%</td>
+        <td>${fmt(r.collectionEff, 1)}%</td>
+        <td>${lossPill(r.atcLoss, false)}</td>
+        <td>₹${fmt(r.abr, 2)}</td>
+        <td>${thruRatePill(r.thruRate)}</td>
+        <td style="font-weight:700;color:var(--crit);">₹${fmt(r.atcLossValueCr, 2)}</td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    console.error('Failed to load Top 150 feeders:', err);
+    tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;padding:16px;color:var(--ink-3)">Failed to load data.</td></tr>`;
   }
 }
 
@@ -1107,7 +1679,6 @@ async function loadSummary() {
       const res = await fetch(`/api/psr/summary${q}`);
       if (!res.ok) throw new Error();
       const json = await res.json();
-      if (!json.success) throw new Error();
       data = json.data;
     } catch {
       const res = await fetch('data/summary.json');
@@ -1120,24 +1691,11 @@ async function loadSummary() {
       }
     }
     state.summaryData = data;
-
-    // Populate Zone dropdown dynamically
-    populateZoneDropdown();
-
     renderSummaryTable();
   } catch (err) {
     console.error('Failed to load summary:', err);
     tbody.innerHTML = `<tr><td colspan="21" style="text-align:center;padding:24px;color:var(--ink-3)">Failed to load summary table.</td></tr>`;
   }
-}
-
-function populateZoneDropdown() {
-  const select = document.getElementById('fZone');
-  const currentVal = select.value;
-  const zones = [...new Set(state.summaryData.filter(r => r.row_type === 1).map(r => r.zone))].sort();
-
-  select.innerHTML = '<option value="">All Zones</option>' + zones.map(z => `<option value="${z}">${z}</option>`).join('');
-  if (zones.includes(currentVal)) select.value = currentVal;
 }
 
 function renderSummaryTable() {
@@ -1147,17 +1705,14 @@ function renderSummaryTable() {
 
   let data = [...state.summaryData];
 
-  // Apply Zone filter if selected
   if (zoneFilter) {
     data = data.filter(r => r.row_type === 3 || (r.zone && r.zone.toLowerCase().includes(zoneFilter)));
   }
 
-  // Apply row text search
   if (search) {
     data = data.filter(r => r.row_type === 3 || (r.discom && r.discom.toLowerCase().includes(search)) || (r.zone && r.zone.toLowerCase().includes(search)));
   }
 
-  // Sorting
   if (state.sortCol) {
     const zoneRows = data.filter(r => r.row_type === 1);
     const totals = data.filter(r => r.row_type !== 1);
@@ -1229,13 +1784,20 @@ document.querySelectorAll('#summaryTbl th[data-col]').forEach(th => {
   });
 });
 
-// ── Filter Triggers ──
+// ── Filter Chips ──
 function updateChips() {
   const chipContainer = document.getElementById('chipRow');
   const chips = [];
   if (state.discom) chips.push(`Discom: ${state.discom}`);
   if (state.zone) chips.push(`Zone: ${state.zone}`);
+  if (state.circle) chips.push(`Circle: ${state.circle}`);
+  if (state.division) chips.push(`Division: ${state.division}`);
+  if (state.area) chips.push(`Area: ${state.area}`);
+  if (state.feederType) chips.push(`Type: ${state.feederType}`);
   if (state.search) chips.push(`Search: "${state.search}"`);
+  if (state.excludeAbnormal) chips.push(`Excl: Abnormal Assessment`);
+  if (state.excludeBilledGtInput) chips.push(`Excl: Billed > Input`);
+  if (state.excludeZeroInput) chips.push(`Excl: Zero Input`);
 
   chipContainer.innerHTML = chips.map(c => `
     <div class="chip">
@@ -1245,71 +1807,88 @@ function updateChips() {
   `).join('');
 }
 
+// ── Master Filter Trigger Function ──
+function onFilterChanged() {
+  updateChips();
+  loadKpis();
+  loadByDiscomSummary();
+  loadFeederTypeBreakdown();
+  loadWorstFeeders();
+  loadTop150Feeders();
+  loadSummary();
+
+  const csvUrl = state.discom ? `/api/psr/summary/download?format=csv&discom=${encodeURIComponent(state.discom)}` : '/api/psr/summary/download?format=csv';
+  document.getElementById('btnSummaryCsv').href = csvUrl;
+}
+
+// ── Event Listeners for Filters ──
 document.getElementById('fDiscom').addEventListener('change', function() {
   state.discom = this.value;
   state.zone = '';
+  state.circle = '';
+  state.division = '';
   document.getElementById('fZone').value = '';
-  updateChips();
-  loadKpis();
-  loadWorstFeeders();
-  loadSummary();
-  // Update CSV download link with filter
-  const csvUrl = state.discom ? `/api/psr/summary/download?format=csv&discom=${encodeURIComponent(state.discom)}` : '/api/psr/summary/download?format=csv';
-  document.getElementById('btnSummaryCsv').href = csvUrl;
-});
-
-document.getElementById('btnSummaryCsv').addEventListener('click', function(e) {
-  if (window.location.hostname.includes('github.io') || window.location.protocol === 'file:') {
-    e.preventDefault();
-    if (!state.summaryData || !state.summaryData.length) return;
-    const headers = [
-      "DISCOM","ZONE","FEEDER_COUNT","AUDITED_COUNT","IE_ZERO_COUNT","NO_CONS_COUNT",
-      "INPUT_ENERGY_PROG_MWH","SOLD_ENERGY_PROG_MWH","LINE_LOSS_PROG_PCT","ASSESSMENT_PROG_LAKHS",
-      "REALIZATION_PROG_LAKHS","COLLECTION_EFF_PROG_PCT","ATC_LOSS_PROG_PCT","ATC_LOSS_PROG_LAKHS",
-      "BILLING_EFF_PROG_PCT","ABR_RS_PER_KWH"
-    ];
-    let csv = headers.map(h => `"${h}"`).join(',') + '\r\n';
-    for (const r of state.summaryData) {
-      const rowData = [
-        r.discom || '', r.zone || '', r.feeder_count, r.audited_count, r.ie_zero_count, r.no_cons_count,
-        r.tot_input_energy, r.tot_sold_energy, r.line_loss_pct, r.tot_assessment,
-        r.tot_realization, r.collection_eff, r.atc_loss_pct, r.atc_loss_amount,
-        r.billing_eff, r.avg_billing_rate
-      ];
-      csv += rowData.map(v => `"${v !== undefined && v !== null ? String(v).replace(/"/g, '""') : ''}"`).join(',') + '\r\n';
-    }
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `UPPCL_PSR_Summary_${state.discom || 'ALL'}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
+  document.getElementById('fCircle').value = '';
+  document.getElementById('fDivision').value = '';
+  loadCascadeOptions();
+  onFilterChanged();
 });
 
 document.getElementById('fZone').addEventListener('change', function() {
   state.zone = this.value;
-  updateChips();
-  renderSummaryTable();
+  state.circle = '';
+  state.division = '';
+  document.getElementById('fCircle').value = '';
+  document.getElementById('fDivision').value = '';
+  loadCascadeOptions();
+  onFilterChanged();
 });
 
-document.getElementById('fSearch').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    const q = this.value.trim();
-    if (q) {
-      const discomParam = state.discom ? `&discom=${encodeURIComponent(state.discom)}` : '';
-      window.open(`feeder_drilldown.html?type=atc_loss&slab=Above%2070%25&search=${encodeURIComponent(q)}${discomParam}`, '_blank');
-    }
-  }
+document.getElementById('fCircle').addEventListener('change', function() {
+  state.circle = this.value;
+  state.division = '';
+  document.getElementById('fDivision').value = '';
+  loadCascadeOptions();
+  onFilterChanged();
+});
+
+document.getElementById('fDivision').addEventListener('change', function() {
+  state.division = this.value;
+  onFilterChanged();
+});
+
+document.getElementById('fArea').addEventListener('change', function() {
+  state.area = this.value;
+  onFilterChanged();
+});
+
+document.getElementById('fFeederType').addEventListener('change', function() {
+  state.feederType = this.value;
+  onFilterChanged();
+});
+
+// Leave-out checkboxes
+document.getElementById('chkAbnormal').addEventListener('change', function() {
+  state.excludeAbnormal = this.checked;
+  onFilterChanged();
+});
+
+document.getElementById('chkBilledGtInput').addEventListener('change', function() {
+  state.excludeBilledGtInput = this.checked;
+  onFilterChanged();
+});
+
+document.getElementById('chkZeroInput').addEventListener('change', function() {
+  state.excludeZeroInput = this.checked;
+  onFilterChanged();
 });
 
 document.getElementById('fSearch').addEventListener('input', function() {
   state.search = this.value.trim();
   updateChips();
+  if (state.search.length >= 3) {
+    onFilterChanged();
+  }
 });
 
 document.getElementById('tSearch').addEventListener('input', function() {
@@ -1320,22 +1899,34 @@ document.getElementById('tSearch').addEventListener('input', function() {
 window.resetFilters = function() {
   state.discom = '';
   state.zone = '';
+  state.circle = '';
+  state.division = '';
+  state.area = '';
+  state.feederType = '';
   state.search = '';
   state.tableSearch = '';
+  state.excludeAbnormal = false;
+  state.excludeBilledGtInput = false;
+  state.excludeZeroInput = false;
   state.sortCol = null;
   state.sortDir = 1;
   state.collapsedDiscoms.clear();
 
   document.getElementById('fDiscom').value = '';
   document.getElementById('fZone').value = '';
+  document.getElementById('fCircle').value = '';
+  document.getElementById('fDivision').value = '';
+  document.getElementById('fArea').value = '';
+  document.getElementById('fFeederType').value = '';
   document.getElementById('fSearch').value = '';
   document.getElementById('tSearch').value = '';
+  document.getElementById('chkAbnormal').checked = false;
+  document.getElementById('chkBilledGtInput').checked = false;
+  document.getElementById('chkZeroInput').checked = false;
   document.getElementById('btnSummaryCsv').href = '/api/psr/summary/download?format=csv';
 
-  updateChips();
-  loadKpis();
-  loadWorstFeeders();
-  loadSummary();
+  loadCascadeOptions();
+  onFilterChanged();
 };
 
 document.getElementById('btnReset').addEventListener('click', resetFilters);
@@ -1350,9 +1941,14 @@ document.getElementById('notesToggle').addEventListener('click', () => {
 
 // ── Initial Boot ──
 checkHealth();
+loadCascadeOptions();
+initMonthlyCharts();
 loadKpis();
+loadByDiscomSummary();
 loadSlabs();
+loadFeederTypeBreakdown();
 loadWorstFeeders();
+loadTop150Feeders();
 loadSummary();
 </script>
 </body>

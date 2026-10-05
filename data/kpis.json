@@ -18,6 +18,8 @@
     "lineLoss": 37.41,
     "atcLoss": 91.74,
     "avgBillingRate": 43.32,
+    "thruRate": 3.58,
+    "lossPerUnit": 39.74,
     "atcLossValueCr": 269748
   },
   "PVVNL": {
@@ -39,6 +41,8 @@
     "lineLoss": 29.26,
     "atcLoss": 89.9,
     "avgBillingRate": 43.33,
+    "thruRate": 4.37,
+    "lossPerUnit": 38.95,
     "atcLossValueCr": 74976
   },
   "DVVNL": {
@@ -60,6 +64,8 @@
     "lineLoss": 40.71,
     "atcLoss": 89.68,
     "avgBillingRate": 32.41,
+    "thruRate": 3.34,
+    "lossPerUnit": 29.07,
     "atcLossValueCr": 39202
   },
   "MVVNL": {
@@ -81,6 +87,8 @@
     "lineLoss": 37.95,
     "atcLoss": 93.85,
     "avgBillingRate": 56.45,
+    "thruRate": 3.47,
+    "lossPerUnit": 52.98,
     "atcLossValueCr": 81996
   },
   "PUVVNL": {
@@ -102,6 +110,8 @@
     "lineLoss": 43.23,
     "atcLoss": 93.45,
     "avgBillingRate": 42.88,
+    "thruRate": 2.81,
+    "lossPerUnit": 40.08,
     "atcLossValueCr": 71131
   },
   "KESCO": {
@@ -123,6 +133,8 @@
     "lineLoss": 37.83,
     "atcLoss": 63.21,
     "avgBillingRate": 14.26,
+    "thruRate": 5.24,
+    "lossPerUnit": 9.01,
     "atcLossValueCr": 1724
   }
 }

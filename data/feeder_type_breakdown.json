@@ -1,0 +1,114 @@
+{
+  "feederType": [
+    {
+      "category": "OTHER",
+      "feeders": 14685,
+      "inputMu": 44469,
+      "billedMu": 26918.3,
+      "billingEff": 60.53,
+      "collectionEff": 16.03,
+      "atcLoss": 90.3
+    },
+    {
+      "category": "MIXED ABOVE 50%",
+      "feeders": 2575,
+      "inputMu": 8658.3,
+      "billedMu": 6013.3,
+      "billingEff": 69.45,
+      "collectionEff": 11.12,
+      "atcLoss": 92.28
+    },
+    {
+      "category": "MIXED ABOVE 25%",
+      "feeders": 2063,
+      "inputMu": 6528.4,
+      "billedMu": 3897.6,
+      "billingEff": 59.7,
+      "collectionEff": 19.6,
+      "atcLoss": 88.3
+    },
+    {
+      "category": "AGRICULTURE",
+      "feeders": 4072,
+      "inputMu": 4436.9,
+      "billedMu": 2684.2,
+      "billingEff": 60.5,
+      "collectionEff": 23.35,
+      "atcLoss": 85.88
+    },
+    {
+      "category": "INDUSTRIAL ABOVE 75%",
+      "feeders": 771,
+      "inputMu": 2438.1,
+      "billedMu": 2050.3,
+      "billingEff": 84.1,
+      "collectionEff": 6.3,
+      "atcLoss": 94.7
+    },
+    {
+      "category": "INDEPENDENT",
+      "feeders": 1470,
+      "inputMu": 1203.7,
+      "billedMu": 835.1,
+      "billingEff": 69.38,
+      "collectionEff": 10.04,
+      "atcLoss": 93.04
+    },
+    {
+      "category": "SUBSTATION",
+      "feeders": 159,
+      "inputMu": 100.9,
+      "billedMu": 51.2,
+      "billingEff": 50.74,
+      "collectionEff": 76.26,
+      "atcLoss": 61.31
+    },
+    {
+      "category": "SPARE",
+      "feeders": 41,
+      "inputMu": 35.1,
+      "billedMu": 28.6,
+      "billingEff": 81.54,
+      "collectionEff": 84.6,
+      "atcLoss": 31.02
+    },
+    {
+      "category": "Other",
+      "feeders": 1,
+      "inputMu": 4.2,
+      "billedMu": 3.6,
+      "billingEff": 85.15,
+      "collectionEff": 37.21,
+      "atcLoss": 68.32
+    }
+  ],
+  "area": [
+    {
+      "category": "RURAL",
+      "feeders": 17039,
+      "inputMu": 38244.7,
+      "billedMu": 21800.3,
+      "billingEff": 57,
+      "collectionEff": 7.46,
+      "atcLoss": 95.74
+    },
+    {
+      "category": "URBAN",
+      "feeders": 7344,
+      "inputMu": 24599.1,
+      "billedMu": 17443,
+      "billingEff": 70.91,
+      "collectionEff": 18.52,
+      "atcLoss": 86.87
+    },
+    {
+      "category": "TEHSIL",
+      "feeders": 1454,
+      "inputMu": 5031,
+      "billedMu": 3239,
+      "billingEff": 64.38,
+      "collectionEff": 37.37,
+      "atcLoss": 75.94
+    }
+  ]
+}

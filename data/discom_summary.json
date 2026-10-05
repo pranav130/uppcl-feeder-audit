@@ -1,0 +1,67 @@
+[
+  {
+    "discom": "PASCHIMANCHAL",
+    "feeders": 8038,
+    "inputMu": 19248.2,
+    "billedMu": 13616.1,
+    "billingEff": 70.74,
+    "collectionEff": 14.27,
+    "atcLoss": 89.9,
+    "abr": 43.33,
+    "thruRate": 4.37,
+    "realisedCr": 8420.7,
+    "atcLossValueCr": 74978.9
+  },
+  {
+    "discom": "DAKSHINANCHAL",
+    "feeders": 6042,
+    "inputMu": 13487.4,
+    "billedMu": 7997,
+    "billingEff": 59.29,
+    "collectionEff": 17.4,
+    "atcLoss": 89.68,
+    "abr": 32.41,
+    "thruRate": 3.34,
+    "realisedCr": 4509.3,
+    "atcLossValueCr": 39204.3
+  },
+  {
+    "discom": "MADHYANCHAL",
+    "feeders": 5662,
+    "inputMu": 15477.4,
+    "billedMu": 9603.3,
+    "billingEff": 62.05,
+    "collectionEff": 9.91,
+    "atcLoss": 93.85,
+    "abr": 56.45,
+    "thruRate": 3.47,
+    "realisedCr": 5373.5,
+    "atcLossValueCr": 81995.4
+  },
+  {
+    "discom": "POORVANCHAL",
+    "feeders": 5471,
+    "inputMu": 17749.1,
+    "billedMu": 10076.8,
+    "billingEff": 56.77,
+    "collectionEff": 11.54,
+    "atcLoss": 93.45,
+    "abr": 42.88,
+    "thruRate": 2.81,
+    "realisedCr": 4985.4,
+    "atcLossValueCr": 71130.9
+  },
+  {
+    "discom": "KESCO",
+    "feeders": 624,
+    "inputMu": 1912.6,
+    "billedMu": 1189.1,
+    "billingEff": 62.17,
+    "collectionEff": 59.17,
+    "atcLoss": 63.21,
+    "abr": 14.26,
+    "thruRate": 5.24,
+    "realisedCr": 1003.1,
+    "atcLossValueCr": 1723.6
+  }
+]
