@@ -1080,7 +1080,7 @@ async function loadWorstFeeders() {
     document.getElementById('wfTitleHint').innerHTML = `Top 10 of <b>${fmt(total)}</b> feeders in AT&amp;C &gt;70% slab · <a href="${viewAllUrl}" target="_blank" style="color:var(--accent);font-weight:600">View all in Feeder Explorer →</a>`;
 
     tbody.innerHTML = rows.map((r, i) => `
-      <tr class="drill" onclick="window.open('feeder_drilldown.html?search=${encodeURIComponent(r[5])}', '_blank')">
+      <tr class="drill" onclick="window.open('feeder_drilldown.html?type=atc_loss&slab=Above%2070%25&search=${encodeURIComponent(r[5])}${discomParam}', '_blank')">
         <td class="tx" style="color:var(--ink-3)">${i + 1}</td>
         <td class="tx" style="font-weight:600">${r[0]}</td>
         <td class="tx">${r[1]}</td>
@@ -1088,7 +1088,7 @@ async function loadWorstFeeders() {
         <td class="tx" style="font-weight:600;color:var(--accent)">${r[5]}</td>
         <td>${lossPill(r[14], true)}</td>
         <td>${lossPill(r[15], false)}</td>
-        <td class="tx"><a href="feeder_drilldown.html?search=${encodeURIComponent(r[5])}" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:500;">Inspect →</a></td>
+        <td class="tx"><a href="feeder_drilldown.html?type=atc_loss&slab=Above%2070%25&search=${encodeURIComponent(r[5])}${discomParam}" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:500;">Inspect →</a></td>
       </tr>
     `).join('');
   } catch (err) {
@@ -1258,18 +1258,58 @@ document.getElementById('fDiscom').addEventListener('change', function() {
   document.getElementById('btnSummaryCsv').href = csvUrl;
 });
 
+document.getElementById('btnSummaryCsv').addEventListener('click', function(e) {
+  if (window.location.hostname.includes('github.io') || window.location.protocol === 'file:') {
+    e.preventDefault();
+    if (!state.summaryData || !state.summaryData.length) return;
+    const headers = [
+      "DISCOM","ZONE","FEEDER_COUNT","AUDITED_COUNT","IE_ZERO_COUNT","NO_CONS_COUNT",
+      "INPUT_ENERGY_PROG_MWH","SOLD_ENERGY_PROG_MWH","LINE_LOSS_PROG_PCT","ASSESSMENT_PROG_LAKHS",
+      "REALIZATION_PROG_LAKHS","COLLECTION_EFF_PROG_PCT","ATC_LOSS_PROG_PCT","ATC_LOSS_PROG_LAKHS",
+      "BILLING_EFF_PROG_PCT","ABR_RS_PER_KWH"
+    ];
+    let csv = headers.map(h => `"${h}"`).join(',') + '\r\n';
+    for (const r of state.summaryData) {
+      const rowData = [
+        r.discom || '', r.zone || '', r.feeder_count, r.audited_count, r.ie_zero_count, r.no_cons_count,
+        r.tot_input_energy, r.tot_sold_energy, r.line_loss_pct, r.tot_assessment,
+        r.tot_realization, r.collection_eff, r.atc_loss_pct, r.atc_loss_amount,
+        r.billing_eff, r.avg_billing_rate
+      ];
+      csv += rowData.map(v => `"${v !== undefined && v !== null ? String(v).replace(/"/g, '""') : ''}"`).join(',') + '\r\n';
+    }
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `UPPCL_PSR_Summary_${state.discom || 'ALL'}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+});
+
 document.getElementById('fZone').addEventListener('change', function() {
   state.zone = this.value;
   updateChips();
   renderSummaryTable();
 });
 
+document.getElementById('fSearch').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const q = this.value.trim();
+    if (q) {
+      const discomParam = state.discom ? `&discom=${encodeURIComponent(state.discom)}` : '';
+      window.open(`feeder_drilldown.html?type=atc_loss&slab=Above%2070%25&search=${encodeURIComponent(q)}${discomParam}`, '_blank');
+    }
+  }
+});
+
 document.getElementById('fSearch').addEventListener('input', function() {
   state.search = this.value.trim();
   updateChips();
-  if (state.search.length >= 2) {
-    window.open(`feeder_drilldown.html?search=${encodeURIComponent(state.search)}`, '_blank');
-  }
 });
 
 document.getElementById('tSearch').addEventListener('input', function() {

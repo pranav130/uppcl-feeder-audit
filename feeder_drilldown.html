@@ -2,18 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Feeder Audit Data Drill-Down</title>
-    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feeder Audit Data Drilldown</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
-        body { background: #f4f6f9; color: #212529; padding: 20px 24px; }
+        body { background: #f4f6f9; color: #212529; padding: 18px 22px; }
         
         .header { 
-            background: linear-gradient(135deg, #2c3e50, #34495e); 
+            background: linear-gradient(135deg, #1e293b, #334155); 
             color: white; 
-            padding: 22px 28px; 
+            padding: 20px 24px; 
             border-radius: 12px; 
-            margin-bottom: 20px; 
+            margin-bottom: 18px; 
             box-shadow: 0 4px 12px rgba(0,0,0,0.12);
             display: flex;
             justify-content: space-between;
@@ -21,7 +22,7 @@
             flex-wrap: wrap;
             gap: 16px;
         }
-        .header-left h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+        .header-left h1 { font-size: 21px; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
         .header-left p { font-size: 13px; opacity: 0.85; }
         .header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         
@@ -29,7 +30,7 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 9px 16px;
+            padding: 9px 15px;
             font-size: 13px;
             font-weight: 600;
             border-radius: 6px;
@@ -38,92 +39,98 @@
             border: none;
             transition: all 0.2s;
         }
-        .btn-csv { background: #007bff; color: white; box-shadow: 0 2px 6px rgba(0,123,255,0.3); }
-        .btn-csv:hover { background: #0069d9; transform: translateY(-1px); }
-        .btn-excel { background: #28a745; color: white; box-shadow: 0 2px 6px rgba(40,167,69,0.3); }
-        .btn-excel:hover { background: #218838; transform: translateY(-1px); }
-        .btn-back { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); }
-        .btn-back:hover { background: rgba(255,255,255,0.3); }
+        .btn-csv { background: #0284c7; color: white; box-shadow: 0 2px 6px rgba(2,132,199,0.3); }
+        .btn-csv:hover { background: #0369a1; transform: translateY(-1px); }
+        .btn-excel { background: #16a34a; color: white; box-shadow: 0 2px 6px rgba(22,163,74,0.3); }
+        .btn-excel:hover { background: #15803d; transform: translateY(-1px); }
+        .btn-back { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.35); }
+        .btn-back:hover { background: rgba(255,255,255,0.25); }
         
-        .kpi-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
-        .kpi-card { background: white; padding: 14px 18px; border-radius: 10px; border-left: 4px solid #2c3e50; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
-        .kpi-label { font-size: 11px; font-weight: 600; color: #6c757d; text-transform: uppercase; margin-bottom: 4px; }
-        .kpi-value { font-size: 20px; font-weight: 700; color: #111; }
-        .kpi-sub { font-size: 11px; color: #28a745; font-weight: 600; margin-top: 2px; }
+        .kpi-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 18px; }
+        .kpi-card { background: white; padding: 14px 16px; border-radius: 10px; border-left: 4px solid #1e293b; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        .kpi-label { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.4px; }
+        .kpi-value { font-size: 20px; font-weight: 700; color: #0f172a; }
+        .kpi-sub { font-size: 11px; color: #16a34a; font-weight: 600; margin-top: 3px; }
 
-        .table-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
-        .filter-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
-        .search-box { display: flex; align-items: center; gap: 8px; flex: 1; max-width: 450px; }
-        .search-box input { width: 100%; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 13px; outline: none; }
-        .search-box input:focus { border-color: #2c3e50; box-shadow: 0 0 0 2px rgba(31,78,120,0.15); }
+        .table-card { background: white; padding: 18px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        .filter-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 12px; }
+        .search-box { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 260px; max-width: 420px; }
+        .search-box input { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; }
+        .search-box input:focus { border-color: #0284c7; box-shadow: 0 0 0 2px rgba(2,132,199,0.15); }
         
-        .filter-controls { display: flex; align-items: center; gap: 12px; }
-        select { padding: 8px 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 13px; background: white; outline: none; }
+        .filter-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        select { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; background: white; outline: none; cursor: pointer; }
+        select:focus { border-color: #0284c7; }
         
-        .table-container { overflow-x: auto; max-height: 600px; border: 1px solid #e9ecef; border-radius: 6px; }
+        .table-container { overflow-x: auto; max-height: 620px; border: 1px solid #e2e8f0; border-radius: 6px; }
         table { width: 100%; border-collapse: collapse; font-size: 11.5px; white-space: nowrap; }
         thead { position: sticky; top: 0; z-index: 2; }
-        th { background: #2c3e50; color: white; padding: 10px 8px; font-weight: 600; text-align: right; border-right: 1px solid rgba(255,255,255,0.15); }
+        th { background: #1e293b; color: white; padding: 10px 8px; font-weight: 600; text-align: right; border-right: 1px solid rgba(255,255,255,0.12); }
         th.text-left { text-align: left; }
-        td { padding: 7px 8px; text-align: right; border-bottom: 1px solid #dee2e6; border-right: 1px solid #f1f3f5; }
+        td { padding: 7px 8px; text-align: right; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f8fafc; }
         td.text-left { text-align: left; }
-        tr:hover { background: #f8f9fa; }
-        tr:nth-child(even) { background: #fafbfc; }
+        tr:hover { background: #f8fafc; }
+        tr:nth-child(even) { background: #fcfdfe; }
         
-        .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; font-size: 12.5px; color: #6c757d; }
+        .pill { display: inline-block; padding: 2px 7px; border-radius: 10px; font-weight: 600; font-size: 10.5px; }
+        .pill-loss { background: #fee2e2; color: #b91c1c; }
+        .pill-good { background: #dcfce7; color: #15803d; }
+        
+        .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 12.5px; color: #64748b; flex-wrap: wrap; gap: 10px; }
         .page-buttons { display: flex; gap: 4px; }
-        .page-btn { padding: 6px 12px; border: 1px solid #dee2e6; background: white; border-radius: 4px; cursor: pointer; font-size: 12px; }
-        .page-btn.active { background: #2c3e50; color: white; border-color: #2c3e50; }
-        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .page-btn { padding: 6px 11px; border: 1px solid #cbd5e1; background: white; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .page-btn:hover:not(:disabled) { background: #f1f5f9; }
+        .page-btn.active { background: #1e293b; color: white; border-color: #1e293b; }
+        .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <div class="header-left">
-            <h1 id="pageTitle">UPPCL 11KV Feeder Audit Data</h1>
+            <h1 id="pageTitle">⚡ UPPCL 11KV Feeder Audit Drilldown</h1>
             <p id="pageSub">Audit Data Rows for Selected Slab | Progressive Cumulative Upto August 2026</p>
         </div>
         <div class="header-actions">
-            <a id="btnCsv" href="#" class="btn btn-csv" download>
+            <a id="btnCsv" href="#" class="btn btn-csv">
                 📥 Download Filtered CSV
             </a>
             <a id="btnExcel" href="#" class="btn btn-excel" download>
                 📥 Download Excel (.xlsx)
             </a>
-            <button onclick="window.close(); if(!window.closed) history.back();" class="btn btn-back">
+            <button onclick="if(window.history.length > 1) { history.back(); } else { window.location.href='index.html'; }" class="btn btn-back">
                 ← Back to Dashboard
             </button>
         </div>
     </div>
 
     <div class="kpi-strip">
-        <div class="kpi-card" style="border-left-color: #2c3e50;">
+        <div class="kpi-card" style="border-left-color: #1e293b;">
             <div class="kpi-label">Feeders in Slab</div>
             <div class="kpi-value" id="kpiFeeders">0</div>
             <div class="kpi-sub" id="kpiSlabName">Slab</div>
         </div>
-        <div class="kpi-card" style="border-left-color: #007bff;">
+        <div class="kpi-card" style="border-left-color: #0284c7;">
             <div class="kpi-label">Input Energy Prog.</div>
             <div class="kpi-value" id="kpiIE">0.0</div>
             <div class="kpi-sub">MWh (Cumulative)</div>
         </div>
-        <div class="kpi-card" style="border-left-color: #28a745;">
+        <div class="kpi-card" style="border-left-color: #16a34a;">
             <div class="kpi-label">Sold Energy Prog.</div>
             <div class="kpi-value" id="kpiSE">0.0</div>
             <div class="kpi-sub">MWh (Cumulative)</div>
         </div>
-        <div class="kpi-card" style="border-left-color: #17a2b8;">
+        <div class="kpi-card" style="border-left-color: #0891b2;">
             <div class="kpi-label">Assessment Prog.</div>
             <div class="kpi-value" id="kpiAss">0.0</div>
             <div class="kpi-sub">Lakhs (Cumulative)</div>
         </div>
-        <div class="kpi-card" style="border-left-color: #6f42c1;">
+        <div class="kpi-card" style="border-left-color: #7c3aed;">
             <div class="kpi-label">Realization Prog.</div>
             <div class="kpi-value" id="kpiReal">0.0</div>
             <div class="kpi-sub">Lakhs (Cumulative)</div>
         </div>
-        <div class="kpi-card" style="border-left-color: #fd7e14;">
+        <div class="kpi-card" style="border-left-color: #ea580c;">
             <div class="kpi-label">Avg Efficiency</div>
             <div class="kpi-value" id="kpiBE">0.00%</div>
             <div class="kpi-sub" id="kpiLL">Line Loss: 0.00%</div>
@@ -133,10 +140,26 @@
     <div class="table-card">
         <div class="filter-bar">
             <div class="search-box">
-                <input type="text" id="searchInput" placeholder="🔍 Search by Feeder, Substation, Division, Circle, Zone, or Discom...">
+                <input type="text" id="searchInput" placeholder="🔍 Search Feeder, Substation, Division, Circle, Zone, Discom...">
             </div>
             <div class="filter-controls">
-                <select id="discomFilter">
+                <select id="lossTypeSelect" title="Select Loss Type">
+                    <option value="line_loss">Line Loss Slabs</option>
+                    <option value="atc_loss">AT&amp;C Loss Slabs</option>
+                </select>
+                <select id="slabSelect" title="Select Slab">
+                    <option value="0_to_5_pct">0% to 5%</option>
+                    <option value="5_to_10_pct">5% to 10%</option>
+                    <option value="10_to_20_pct">10% to 20%</option>
+                    <option value="20_to_30_pct">20% to 30%</option>
+                    <option value="30_to_50_pct">30% to 50%</option>
+                    <option value="50_to_70_pct">50% to 70%</option>
+                    <option value="Above_70_pct">Above 70%</option>
+                    <option value="Abnormal">Abnormal</option>
+                    <option value="IE_0">IE 0</option>
+                    <option value="No_Cons">No Cons</option>
+                </select>
+                <select id="discomFilter" title="Filter by Discom">
                     <option value="">All Discoms</option>
                     <option value="DVVNL">DVVNL (Dakshinanchal)</option>
                     <option value="MVVNL">MVVNL (Madhyanchal)</option>
@@ -144,7 +167,7 @@
                     <option value="PUVVNL">PUVVNL (Poorvanchal)</option>
                     <option value="KESCO">KESCO</option>
                 </select>
-                <select id="pageSizeSelect">
+                <select id="pageSizeSelect" title="Rows per page">
                     <option value="50">50 rows</option>
                     <option value="100">100 rows</option>
                     <option value="250">250 rows</option>
@@ -174,9 +197,9 @@
                         <th>Billing Eff.</th>
                         <th>Collection Eff.</th>
                         <th>Line Loss</th>
-                        <th>AT&C Loss</th>
+                        <th>AT&amp;C Loss</th>
                         <th>Line Loss Slab</th>
-                        <th>AT&C Loss Slab</th>
+                        <th>AT&amp;C Loss Slab</th>
                         <th>I.E August</th>
                         <th>Aug Billable</th>
                         <th>SE August</th>
@@ -185,7 +208,7 @@
                     </tr>
                 </thead>
                 <tbody id="tableBody">
-                    <tr><td colspan="24" style="text-align:center; padding:30px; color:#6c757d;">Loading feeder audit data from PostgreSQL...</td></tr>
+                    <tr><td colspan="24" style="text-align:center; padding:30px; color:#64748b;">Loading feeder audit data...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -199,97 +222,173 @@
     <script>
         const slugMap = {
             '0% to 5%': '0_to_5_pct',
+            '0_to_5_pct': '0_to_5_pct',
             '5% to 10%': '5_to_10_pct',
+            '5_to_10_pct': '5_to_10_pct',
             '10% to 20%': '10_to_20_pct',
+            '10_to_20_pct': '10_to_20_pct',
             '20% to 30%': '20_to_30_pct',
+            '20_to_30_pct': '20_to_30_pct',
             '30% to 50%': '30_to_50_pct',
+            '30_to_50_pct': '30_to_50_pct',
             '50% to 70%': '50_to_70_pct',
+            '50_to_70_pct': '50_to_70_pct',
             'Above 70%': 'Above_70_pct',
+            'Above_70_pct': 'Above_70_pct',
             'Abnormal': 'Abnormal',
             'IE 0': 'IE_0',
-            'No Cons': 'No_Cons'
+            'IE_0': 'IE_0',
+            'I.E. is 0 or ot filled': 'IE_0',
+            'No Cons': 'No_Cons',
+            'No_Cons': 'No_Cons',
+            'No Cosumers Tagged': 'No_Cons'
+        };
+
+        const titleMap = {
+            '0_to_5_pct': '0% to 5%',
+            '5_to_10_pct': '5% to 10%',
+            '10_to_20_pct': '10% to 20%',
+            '20_to_30_pct': '20% to 30%',
+            '30_to_50_pct': '30% to 50%',
+            '50_to_70_pct': '50% to 70%',
+            'Above_70_pct': 'Above 70%',
+            'Abnormal': 'Abnormal',
+            'IE_0': 'IE 0',
+            'No_Cons': 'No Cons'
         };
 
         const urlParams = new URLSearchParams(window.location.search);
-        const lossType = urlParams.get('type') || 'line_loss';
-        const slabParam = urlParams.get('slab') || '30% to 50%';
-        const slug = slugMap[slabParam] || '30_to_50_pct';
-        const lossTypeTitle = (lossType === 'atc_loss') ? 'AT&C Loss' : 'Line Loss';
+        let lossType = urlParams.get('type') || 'line_loss';
+        if (lossType !== 'atc_loss' && lossType !== 'line_loss') lossType = 'line_loss';
+
+        let rawSlab = urlParams.get('slab') || '';
+        let slug = slugMap[rawSlab] || '30_to_50_pct';
+        let slabParam = titleMap[slug] || '30% to 50%';
+
+        const discomParam = urlParams.get('discom') || '';
+        const searchParam = urlParams.get('search') || '';
 
         let currentPage = 1;
         let pageSize = 50;
         let searchDebounceTimer = null;
+        let filteredRows = [];
+        const slabCache = {};
 
-        // Set static fallback Excel export link
-        const excelPrefix = (lossType === 'atc_loss') ? 'ATC_Loss' : 'Line_Loss';
-        document.getElementById('btnExcel').href = `Slab_Excel_Exports/${excelPrefix}_${slug}.xlsx`;
-        document.getElementById('btnExcel').download = `${excelPrefix}_${slug}.xlsx`;
+        const isGitHubPages = window.location.hostname.includes('github.io') || window.location.protocol === 'file:';
+        let useStaticMode = isGitHubPages;
 
-        // Update header texts
-        document.title = `${lossTypeTitle} Slab: ${slabParam} - Feeder Audit Data`;
-        document.getElementById('pageTitle').textContent = `UPPCL 11KV Feeder Audit Data — ${lossTypeTitle} Slab: ${slabParam}`;
-        document.getElementById('kpiSlabName').textContent = `${lossTypeTitle}: ${slabParam}`;
+        // Initialize form controls from URL params
+        document.getElementById('lossTypeSelect').value = lossType;
+        document.getElementById('slabSelect').value = slug;
+        if (searchParam) document.getElementById('searchInput').value = searchParam;
+        if (discomParam) setDiscomSelect(discomParam);
 
-        // Fetch Drilldown KPIs dynamically
-        async function fetchDrilldownKpis() {
-            const discom = document.getElementById('discomFilter').value;
-            const search = document.getElementById('searchInput').value.trim();
-            
-            const url = `/api/psr/drilldown/kpis?type=${encodeURIComponent(lossType)}&slab=${encodeURIComponent(slabParam)}&discom=${encodeURIComponent(discom)}&search=${encodeURIComponent(search)}`;
-            try {
-                const res = await fetch(url);
-                if (!res.ok) throw new Error('KPI API returned ' + res.status);
-                const json = await res.json();
-                if (!json.success || !json.data) throw new Error('Malformed KPI response');
-
-                const data = json.data;
-                document.getElementById('kpiFeeders').textContent = data.feeder_count.toLocaleString();
-                document.getElementById('pageSub').textContent = `Detailed Audit Data for ${data.feeder_count.toLocaleString()} Feeders | ${lossTypeTitle} in ${slabParam}`;
-
-                document.getElementById('kpiIE').textContent = data.tot_ie.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
-                document.getElementById('kpiSE').textContent = data.tot_se.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
-                document.getElementById('kpiAss').textContent = data.tot_ass.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
-                document.getElementById('kpiReal').textContent = data.tot_real.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
-
-                document.getElementById('kpiBE').textContent = `${data.be_overall}%`;
-                document.getElementById('kpiLL').textContent = `${lossType === 'line_loss' ? 'Line Loss: ' + data.ll_overall + '%' : 'AT&C Loss: ' + data.atc_overall + '%'}`;
-            } catch (err) {
-                console.warn('Drilldown KPI API unavailable, attempting static fallback...');
-                loadStaticFallback();
+        function setDiscomSelect(val) {
+            if (!val) return;
+            const select = document.getElementById('discomFilter');
+            const u = val.toUpperCase().trim();
+            for (let opt of select.options) {
+                if (opt.value && (opt.value === u || opt.text.toUpperCase().includes(u))) {
+                    select.value = opt.value;
+                    return;
+                }
             }
         }
 
-        // Fetch Paginated Feeder Data from PostgreSQL
-        async function fetchFeederData() {
+        function matchDiscom(rowDiscom, filterDiscom) {
+            if (!filterDiscom) return true;
+            const fd = filterDiscom.trim().toUpperCase();
+            const rd = (rowDiscom || '').trim().toUpperCase();
+            const mapping = {
+                'DVVNL': 'DAKSHINANCHAL',
+                'MVVNL': 'MADHYANCHAL',
+                'PVVNL': 'PASCHIMANCHAL',
+                'PUVVNL': 'POORVANCHAL',
+                'KESCO': 'KESCO'
+            };
+            const target = mapping[fd] || fd;
+            return rd === target || rd.includes(target) || target.includes(rd);
+        }
+
+        function matchSearch(row, term) {
+            if (!term) return true;
+            const t = term.toLowerCase();
+            return (
+                (row[5] && row[5].toLowerCase().includes(t)) ||
+                (row[4] && row[4].toLowerCase().includes(t)) ||
+                (row[3] && row[3].toLowerCase().includes(t)) ||
+                (row[2] && row[2].toLowerCase().includes(t)) ||
+                (row[1] && row[1].toLowerCase().includes(t)) ||
+                (row[0] && row[0].toLowerCase().includes(t))
+            );
+        }
+
+        function updateHeaderInfo() {
+            const lossTypeTitle = (lossType === 'atc_loss') ? 'AT&C Loss' : 'Line Loss';
+            const excelPrefix = (lossType === 'atc_loss') ? 'ATC_Loss' : 'Line_Loss';
+
+            document.title = `${lossTypeTitle} Slab: ${slabParam} - Feeder Audit Data`;
+            document.getElementById('pageTitle').textContent = `⚡ UPPCL 11KV Feeder Audit Data — ${lossTypeTitle} Slab: ${slabParam}`;
+            document.getElementById('kpiSlabName').textContent = `${lossTypeTitle}: ${slabParam}`;
+
+            // Excel download link
+            const excelFile = `Slab_Excel_Exports/${excelPrefix}_${slug}.xlsx`;
+            const btnExcel = document.getElementById('btnExcel');
+            btnExcel.href = excelFile;
+            btnExcel.download = `${excelPrefix}_${slug}.xlsx`;
+
+            // CSV download URL setup (for live mode)
+            if (!useStaticMode) {
+                const discom = document.getElementById('discomFilter').value;
+                const search = document.getElementById('searchInput').value.trim();
+                document.getElementById('btnCsv').href = `/api/psr/feeders/download?type=${encodeURIComponent(lossType)}&slab=${encodeURIComponent(slabParam)}&discom=${encodeURIComponent(discom)}&search=${encodeURIComponent(search)}`;
+            }
+        }
+
+        function updateKpis(rows, originalData) {
+            const lossTypeTitle = (lossType === 'atc_loss') ? 'AT&C Loss' : 'Line Loss';
             const discom = document.getElementById('discomFilter').value;
             const search = document.getElementById('searchInput').value.trim();
-            const tbody = document.getElementById('tableBody');
 
-            // Update Dynamic CSV Download Link
-            const csvDownloadUrl = `/api/psr/feeders/download?type=${encodeURIComponent(lossType)}&slab=${encodeURIComponent(slabParam)}&discom=${encodeURIComponent(discom)}&search=${encodeURIComponent(search)}`;
-            document.getElementById('btnCsv').href = csvDownloadUrl;
-
-            tbody.innerHTML = `<tr><td colspan="24" style="text-align:center; padding:30px; color:#6c757d;">Fetching real-time rows from PostgreSQL...</td></tr>`;
-
-            const url = `/api/psr/feeders?type=${encodeURIComponent(lossType)}&slab=${encodeURIComponent(slabParam)}&discom=${encodeURIComponent(discom)}&search=${encodeURIComponent(search)}&page=${currentPage}&limit=${pageSize}`;
-            try {
-                const res = await fetch(url);
-                if (!res.ok) throw new Error('Feeders API returned ' + res.status);
-                const json = await res.json();
-                if (!json.success || !json.rows) throw new Error('Malformed feeders response');
-
-                renderTableRows(json.rows, json.total, (currentPage - 1) * pageSize);
-                renderPagination(json.total, json.totalPages);
-            } catch (err) {
-                console.warn('Live API request failed, loading static fallback:', err.message);
-                loadStaticFallback();
+            if (!discom && !search && originalData && originalData.feeder_count) {
+                document.getElementById('kpiFeeders').textContent = Number(originalData.feeder_count).toLocaleString();
+                document.getElementById('kpiIE').textContent = Number(originalData.tot_ie || 0).toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+                document.getElementById('kpiSE').textContent = Number(originalData.tot_se || 0).toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+                document.getElementById('kpiAss').textContent = Number(originalData.tot_ass || 0).toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+                document.getElementById('kpiReal').textContent = Number(originalData.tot_real || 0).toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+                document.getElementById('kpiBE').textContent = `${originalData.be_overall}%`;
+                document.getElementById('kpiLL').textContent = `${lossType === 'line_loss' ? 'Line Loss: ' + originalData.ll_overall + '%' : 'AT&C Loss: ' + originalData.atc_overall + '%'}`;
+                document.getElementById('pageSub').textContent = `Detailed Audit Data for ${Number(originalData.feeder_count).toLocaleString()} Feeders | ${lossTypeTitle} in ${slabParam}`;
+                return;
             }
+
+            let tot_ie = 0, tot_se = 0, tot_ass = 0, tot_real = 0;
+            for (let i = 0; i < rows.length; i++) {
+                tot_ie += Number(rows[i][8]) || 0;
+                tot_se += Number(rows[i][9]) || 0;
+                tot_ass += Number(rows[i][10]) || 0;
+                tot_real += Number(rows[i][11]) || 0;
+            }
+
+            const be = tot_ie > 0 ? ((tot_se / tot_ie) * 100).toFixed(2) : '0.00';
+            const ce = tot_ass > 0 ? ((tot_real / tot_ass) * 100).toFixed(2) : '0.00';
+            const ll = tot_ie > 0 ? (((tot_ie - tot_se) / tot_ie) * 100).toFixed(2) : '0.00';
+            const atc = (tot_ie > 0 && tot_ass > 0) ? ((1 - (tot_se / tot_ie) * (tot_real / tot_ass)) * 100).toFixed(2) : '0.00';
+
+            document.getElementById('kpiFeeders').textContent = rows.length.toLocaleString();
+            document.getElementById('kpiIE').textContent = tot_ie.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+            document.getElementById('kpiSE').textContent = tot_se.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+            document.getElementById('kpiAss').textContent = tot_ass.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+            document.getElementById('kpiReal').textContent = tot_real.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+            document.getElementById('kpiBE').textContent = `${be}%`;
+            document.getElementById('kpiLL').textContent = `${lossType === 'line_loss' ? 'Line Loss: ' + ll + '%' : 'AT&C Loss: ' + atc + '%'}`;
+            document.getElementById('pageSub').textContent = `Detailed Audit Data for ${rows.length.toLocaleString()} Feeders | ${lossTypeTitle} in ${slabParam}`;
         }
 
         function renderTableRows(rows, total, offset) {
             const tbody = document.getElementById('tableBody');
             if (!rows || rows.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="24" style="text-align:center; padding:30px; color:#6c757d;">No feeders found matching current search/filter.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="24" style="text-align:center; padding:30px; color:#64748b;">No feeders found matching current search/filter.</td></tr>`;
                 document.getElementById('pageInfo').textContent = `Showing 0 to 0 of 0 entries`;
                 document.getElementById('pageButtons').innerHTML = '';
                 return;
@@ -300,36 +399,36 @@
                 const r = rows[i];
                 const rowNum = offset + i + 1;
                 html += `<tr>
-                    <td class="text-left" style="color:#6c757d;">${rowNum}</td>
+                    <td class="text-left" style="color:#64748b;">${rowNum}</td>
                     <td class="text-left" style="font-weight:600;">${r[0]}</td>
                     <td class="text-left">${r[1]}</td>
                     <td class="text-left">${r[2]}</td>
                     <td class="text-left">${r[3]}</td>
                     <td class="text-left">${r[4]}</td>
-                    <td class="text-left" style="font-weight:600; color:#2c3e50;">${r[5]}</td>
+                    <td class="text-left" style="font-weight:600; color:#0284c7;">${r[5]}</td>
                     <td class="text-left">${r[6]}</td>
                     <td class="text-left">${r[7]}</td>
-                    <td>${Number(r[8]).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
-                    <td>${Number(r[9]).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
-                    <td>${Number(r[10]).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
-                    <td>${Number(r[11]).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+                    <td>${Number(r[8]).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                    <td>${Number(r[9]).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                    <td>${Number(r[10]).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                    <td>${Number(r[11]).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
                     <td>${r[12]}</td>
                     <td>${r[13]}</td>
                     <td style="font-weight:600;">${r[14]}</td>
-                    <td style="font-weight:600; color:#dc3545;">${r[15]}</td>
+                    <td style="font-weight:600; color:#dc2626;">${r[15]}</td>
                     <td>${r[16]}</td>
                     <td>${r[17]}</td>
-                    <td>${Number(r[18]).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+                    <td>${Number(r[18]).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
                     <td>${Number(r[19]).toLocaleString()}</td>
-                    <td>${Number(r[20]).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
-                    <td>${Number(r[21]).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
-                    <td>${Number(r[22]).toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+                    <td>${Number(r[20]).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                    <td>${Number(r[21]).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                    <td>${Number(r[22]).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
                 </tr>`;
             }
             tbody.innerHTML = html;
 
             const end = Math.min(offset + rows.length, total);
-            document.getElementById('pageInfo').textContent = `Showing ${offset + 1} to ${end} of ${total.toLocaleString()} entries`;
+            document.getElementById('pageInfo').textContent = `Showing ${(offset + 1).toLocaleString()} to ${end.toLocaleString()} of ${total.toLocaleString()} entries`;
         }
 
         function renderPagination(total, totalPages) {
@@ -361,61 +460,235 @@
 
         function goToPage(p) {
             currentPage = p;
-            fetchFeederData();
-            document.querySelector('.table-container').scrollTop = 0;
+            if (useStaticMode) {
+                const start = (currentPage - 1) * pageSize;
+                const pageRows = filteredRows.slice(start, start + pageSize);
+                renderTableRows(pageRows, filteredRows.length, start);
+                renderPagination(filteredRows.length, Math.ceil(filteredRows.length / pageSize));
+            } else {
+                fetchFeederData();
+            }
+            const container = document.querySelector('.table-container');
+            if (container) container.scrollTop = 0;
         }
 
-        // Static script fallback if accessed outside backend
-        function loadStaticFallback() {
-            const prefix = (lossType === 'atc_loss') ? 'atc_loss' : 'line_loss';
-            const dataScriptPath = `slab_data/${prefix}_${slug}.js`;
+        function applyStaticFilters() {
+            const key = `${lossType}_${slug}`;
+            const data = slabCache[key];
+            if (!data || !data.rows) return;
+
+            const discom = document.getElementById('discomFilter').value;
+            const search = document.getElementById('searchInput').value.trim();
+
+            filteredRows = data.rows.filter(r => {
+                return matchDiscom(r[0], discom) && matchSearch(r, search);
+            });
+
+            updateKpis(filteredRows, data);
+
+            const start = (currentPage - 1) * pageSize;
+            const pageRows = filteredRows.slice(start, start + pageSize);
+            renderTableRows(pageRows, filteredRows.length, start);
+            renderPagination(filteredRows.length, Math.ceil(filteredRows.length / pageSize));
+        }
+
+        function loadStaticDataset() {
+            useStaticMode = true;
+            updateHeaderInfo();
+
+            const key = `${lossType}_${slug}`;
+            if (slabCache[key]) {
+                applyStaticFilters();
+                return;
+            }
+
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = `<tr><td colspan="24" style="text-align:center; padding:30px; color:#64748b;">Loading ${slabParam} dataset (${lossType === 'atc_loss' ? 'AT&C Loss' : 'Line Loss'})...</td></tr>`;
+
+            const scriptPath = `slab_data/${lossType}_${slug}.js`;
             const s = document.createElement('script');
-            s.src = dataScriptPath;
+            s.src = scriptPath;
             s.onload = function() {
                 if (window.CURRENT_SLAB_DATA) {
-                    const data = window.CURRENT_SLAB_DATA;
-                    document.getElementById('kpiFeeders').textContent = data.feeder_count.toLocaleString();
-                    document.getElementById('kpiIE').textContent = data.tot_ie.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
-                    document.getElementById('kpiSE').textContent = data.tot_se.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
-                    document.getElementById('kpiAss').textContent = data.tot_ass.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
-                    document.getElementById('kpiReal').textContent = data.tot_real.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
-                    document.getElementById('kpiBE').textContent = `${data.be_overall}%`;
-                    document.getElementById('kpiLL').textContent = `${lossType === 'line_loss' ? 'Line Loss: ' + data.ll_overall + '%' : 'AT&C Loss: ' + data.atc_overall + '%'}`;
-
-                    const start = (currentPage - 1) * pageSize;
-                    const pageRows = data.rows.slice(start, start + pageSize);
-                    renderTableRows(pageRows, data.rows.length, start);
-                    renderPagination(data.rows.length, Math.ceil(data.rows.length / pageSize));
+                    slabCache[key] = window.CURRENT_SLAB_DATA;
+                    applyStaticFilters();
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="24" style="text-align:center; padding:30px; color:#dc2626;">Dataset loaded but empty.</td></tr>`;
                 }
+            };
+            s.onerror = function() {
+                tbody.innerHTML = `<tr><td colspan="24" style="text-align:center; padding:30px; color:#dc2626;">Failed to load slab dataset (${scriptPath}).</td></tr>`;
             };
             document.head.appendChild(s);
         }
+
+        // Live API fallback functions
+        async function fetchDrilldownKpis() {
+            const discom = document.getElementById('discomFilter').value;
+            const search = document.getElementById('searchInput').value.trim();
+            const url = `/api/psr/drilldown/kpis?type=${encodeURIComponent(lossType)}&slab=${encodeURIComponent(slabParam)}&discom=${encodeURIComponent(discom)}&search=${encodeURIComponent(search)}`;
+            
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('KPI API returned ' + res.status);
+            const json = await res.json();
+            if (!json.success || !json.data) throw new Error('Malformed KPI response');
+
+            const data = json.data;
+            document.getElementById('kpiFeeders').textContent = data.feeder_count.toLocaleString();
+            document.getElementById('pageSub').textContent = `Detailed Audit Data for ${data.feeder_count.toLocaleString()} Feeders | ${(lossType === 'atc_loss' ? 'AT&C Loss' : 'Line Loss')} in ${slabParam}`;
+
+            document.getElementById('kpiIE').textContent = data.tot_ie.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+            document.getElementById('kpiSE').textContent = data.tot_se.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+            document.getElementById('kpiAss').textContent = data.tot_ass.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+            document.getElementById('kpiReal').textContent = data.tot_real.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+
+            document.getElementById('kpiBE').textContent = `${data.be_overall}%`;
+            document.getElementById('kpiLL').textContent = `${lossType === 'line_loss' ? 'Line Loss: ' + data.ll_overall + '%' : 'AT&C Loss: ' + data.atc_overall + '%'}`;
+        }
+
+        async function fetchFeederData() {
+            const discom = document.getElementById('discomFilter').value;
+            const search = document.getElementById('searchInput').value.trim();
+            const tbody = document.getElementById('tableBody');
+
+            tbody.innerHTML = `<tr><td colspan="24" style="text-align:center; padding:30px; color:#64748b;">Fetching real-time rows from PostgreSQL...</td></tr>`;
+
+            const url = `/api/psr/feeders?type=${encodeURIComponent(lossType)}&slab=${encodeURIComponent(slabParam)}&discom=${encodeURIComponent(discom)}&search=${encodeURIComponent(search)}&page=${currentPage}&limit=${pageSize}`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('Feeders API returned ' + res.status);
+            const json = await res.json();
+            if (!json.success || !json.rows) throw new Error('Malformed feeders response');
+
+            renderTableRows(json.rows, json.total, (currentPage - 1) * pageSize);
+            renderPagination(json.total, json.totalPages);
+        }
+
+        async function loadData() {
+            updateHeaderInfo();
+            if (useStaticMode) {
+                loadStaticDataset();
+                return;
+            }
+
+            try {
+                await Promise.all([fetchDrilldownKpis(), fetchFeederData()]);
+            } catch (err) {
+                console.warn('Live API request failed, falling back to static dataset:', err.message);
+                loadStaticDataset();
+            }
+        }
+
+        // Client-side CSV Download
+        function downloadClientCsv() {
+            if (!filteredRows || !filteredRows.length) {
+                alert('No rows matching current search/filter to download.');
+                return;
+            }
+
+            const headers = [
+                '#', 'Discom', 'Zone', 'Circle', 'Division', 'Substation', 
+                'Outgoing Feeder', 'Project Area', 'Feeder Nature', 
+                'Input Energy Prog.', 'Sold Energy Prog.', 'Assessment Prog.', 'Realization Prog.', 
+                'Billing Eff.', 'Collection Eff.', 'Line Loss', 'AT&C Loss', 
+                'Line Loss Slab', 'AT&C Loss Slab', 'I.E August', 'Aug Billable', 
+                'SE August', 'ASS August', 'Real August'
+            ];
+
+            let csv = headers.map(h => `"${h}"`).join(',') + '\r\n';
+            for (let i = 0; i < filteredRows.length; i++) {
+                const r = filteredRows[i];
+                const rowNum = i + 1;
+                const rowData = [rowNum, ...r];
+                const line = rowData.map(val => {
+                    if (val === null || val === undefined) return '""';
+                    const s = String(val).replace(/"/g, '""');
+                    return `"${s}"`;
+                }).join(',');
+                csv += line + '\r\n';
+            }
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const discomTag = document.getElementById('discomFilter').value || 'ALL';
+            a.href = url;
+            a.download = `UPPCL_Feeder_Audit_${lossType}_${slug}_${discomTag}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // CSV Click Interception
+        document.getElementById('btnCsv').addEventListener('click', function(e) {
+            if (useStaticMode) {
+                e.preventDefault();
+                downloadClientCsv();
+            }
+        });
 
         // Filter and Search event handlers
         document.getElementById('searchInput').addEventListener('input', function() {
             clearTimeout(searchDebounceTimer);
             searchDebounceTimer = setTimeout(() => {
                 currentPage = 1;
-                fetchDrilldownKpis();
-                fetchFeederData();
-            }, 300);
+                if (useStaticMode) {
+                    applyStaticFilters();
+                } else {
+                    loadData();
+                }
+            }, 250);
         });
 
         document.getElementById('discomFilter').addEventListener('change', function() {
             currentPage = 1;
-            fetchDrilldownKpis();
-            fetchFeederData();
+            if (useStaticMode) {
+                applyStaticFilters();
+            } else {
+                loadData();
+            }
         });
 
         document.getElementById('pageSizeSelect').addEventListener('change', function() {
             pageSize = parseInt(this.value, 10);
             currentPage = 1;
-            fetchFeederData();
+            if (useStaticMode) {
+                applyStaticFilters();
+            } else {
+                fetchFeederData();
+            }
         });
 
+        document.getElementById('lossTypeSelect').addEventListener('change', function() {
+            lossType = this.value;
+            currentPage = 1;
+            updateUrlParams();
+            loadData();
+        });
+
+        document.getElementById('slabSelect').addEventListener('change', function() {
+            slug = this.value;
+            slabParam = titleMap[slug] || '30% to 50%';
+            currentPage = 1;
+            updateUrlParams();
+            loadData();
+        });
+
+        function updateUrlParams() {
+            const url = new URL(window.location);
+            url.searchParams.set('type', lossType);
+            url.searchParams.set('slab', slabParam);
+            const discom = document.getElementById('discomFilter').value;
+            if (discom) url.searchParams.set('discom', discom);
+            else url.searchParams.delete('discom');
+            const search = document.getElementById('searchInput').value.trim();
+            if (search) url.searchParams.set('search', search);
+            else url.searchParams.delete('search');
+            window.history.replaceState({}, '', url);
+        }
+
         // Initialize Page
-        fetchDrilldownKpis();
-        fetchFeederData();
+        loadData();
     </script>
 </body>
 </html>
