@@ -1754,6 +1754,15 @@ if (notesToggle) {
   });
 }
 
+// ── Sign Out Handler ──
+const btnSignOut = document.getElementById('btnSignOut');
+if (btnSignOut) {
+  btnSignOut.addEventListener('click', () => {
+    sessionStorage.removeItem('uppcl_auth_token');
+    window.location.replace('login.html');
+  });
+}
+
 // Health Check
 async function checkHealth() {
   const badge = document.getElementById('dbBadge');

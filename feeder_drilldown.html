@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>
+    /* ── Auth Guard: Redirect unauthenticated sessions to login page ── */
+    (function() {
+      try {
+        const token = sessionStorage.getItem('uppcl_auth_token');
+        if (!token || token !== btoa('UPPCL_AUTHENTICATED')) {
+          window.location.replace('login.html');
+        }
+      } catch (e) {
+        window.location.replace('login.html');
+      }
+    })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Feeder Audit Data Drilldown</title>

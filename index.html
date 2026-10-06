@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
+<script>
+/* ── Auth Guard: Redirect unauthenticated sessions to login page ── */
+(function() {
+  try {
+    const token = sessionStorage.getItem('uppcl_auth_token');
+    if (!token || token !== btoa('UPPCL_AUTHENTICATED')) {
+      window.location.replace('login.html');
+    }
+  } catch (e) {
+    window.location.replace('login.html');
+  }
+})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>UPPCL 11KV Feeder PSR Dashboard · Live Energy Audit</title>
@@ -592,6 +605,7 @@ tr.zone-row.hidden { display: none; }
         ⬇ Export CSV
       </button>
       <button class="btn btn-theme" id="themeToggle" type="button" title="Toggle dark/light mode">🌙</button>
+      <button class="btn" id="btnSignOut" type="button" title="Sign out of dashboard" style="cursor:pointer;display:inline-flex;align-items:center;gap:4px">🔒 Sign Out</button>
     </div>
   </header>
 
