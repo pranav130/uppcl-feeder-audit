@@ -1564,6 +1564,185 @@ function exportProgressiveSummaryCsv() {
 const btnExpSummary = document.getElementById('btnExportSummaryTable');
 if (btnExpSummary) btnExpSummary.addEventListener('click', exportProgressiveSummaryCsv);
 
+// ── 7. Export Progressive Summary Excel (.xlsx) with Native Expandable / Collapsible Outline ──
+function exportProgressiveSummaryXlsx() {
+  if (!computedResult) return;
+  if (typeof XLSX === 'undefined') {
+    alert('Excel export engine is initializing, please try again in a moment or use Export CSV.');
+    return;
+  }
+  const groups = computedResult.progressiveSummary || [];
+  const selectedZoneUpper = (state.zone || '').trim().toUpperCase();
+  const search = (state.tableSearch || '').trim().toLowerCase();
+
+  let filtered = [...groups];
+  if (selectedZoneUpper) {
+    filtered = filtered.filter(r => r.zone && r.zone.trim().toUpperCase() === selectedZoneUpper);
+  }
+  if (search) {
+    filtered = filtered.filter(r =>
+      (r.discom && r.discom.toLowerCase().includes(search)) ||
+      (r.zone && r.zone.toLowerCase().includes(search))
+    );
+  }
+
+  // Calculate totals by Discom and Grand Total
+  const discomTotalsMap = new Map();
+  const grandTotal = {
+    discom: 'UPPCL', zone: 'Statewide Total', total_feeders: 0,
+    line_0_5: 0, line_5_10: 0, line_10_20: 0, line_20_30: 0,
+    line_30_50: 0, line_50_70: 0, line_above_70: 0, line_abnormal: 0,
+    atc_0_5: 0, atc_5_10: 0, atc_10_20: 0, atc_20_30: 0,
+    atc_30_50: 0, atc_50_70: 0, atc_above_70: 0, atc_abnormal: 0,
+    ie_zero: 0, no_consumers_tagged: 0, row_type: 3
+  };
+
+  const cols = [
+    'total_feeders', 'line_0_5', 'line_5_10', 'line_10_20', 'line_20_30',
+    'line_30_50', 'line_50_70', 'line_above_70', 'line_abnormal',
+    'atc_0_5', 'atc_5_10', 'atc_10_20', 'atc_20_30',
+    'atc_30_50', 'atc_50_70', 'atc_above_70', 'atc_abnormal',
+    'ie_zero', 'no_consumers_tagged'
+  ];
+
+  filtered.forEach(r => {
+    if (!discomTotalsMap.has(r.discom)) {
+      discomTotalsMap.set(r.discom, {
+        discom: r.discom, zone: `${r.discom} Total`, row_type: 2
+      });
+      cols.forEach(c => discomTotalsMap.get(r.discom)[c] = 0);
+    }
+    const dt = discomTotalsMap.get(r.discom);
+    cols.forEach(c => {
+      const v = Number(r[c]) || 0;
+      dt[c] += v;
+      grandTotal[c] += v;
+    });
+  });
+
+  // Sort zone rows if requested
+  if (state.sortCol) {
+    const col = state.sortCol;
+    const dir = state.sortDir;
+    filtered.sort((a, b) => {
+      const va = a[col];
+      const vb = b[col];
+      if (typeof va === 'string') return dir * (va || '').localeCompare(vb || '');
+      return dir * ((Number(va) || 0) - (Number(vb) || 0));
+    });
+  }
+
+  // 2-tier headers matching dashboard
+  const headerRow1 = [
+    'Discom', 'Zone / Rollup', 'Total Feeders',
+    'LINE LOSS SLAB (Progressive Upto Aug-26)', '', '', '', '', '', '', '',
+    'AT&C LOSS SLAB (Progressive Upto Aug-26)', '', '', '', '', '', '', '',
+    'IE 0', 'No Consumers Tagged'
+  ];
+
+  const headerRow2 = [
+    '', '', '',
+    '0-5%', '5-10%', '10-20%', '20-30%', '30-50%', '50-70%', '>70%', 'Abnormal',
+    '0-5%', '5-10%', '10-20%', '20-30%', '30-50%', '50-70%', '>70%', 'Abnormal',
+    '', ''
+  ];
+
+  const aoa = [headerRow1, headerRow2];
+  const rowConfig = [{ level: 0 }, { level: 0 }];
+
+  const discomOrder = ['PASCHIMANCHAL', 'DAKSHINANCHAL', 'MADHYANCHAL', 'POORVANCHAL', 'KESCO'];
+  let discomsPresent = [...new Set(filtered.map(r => r.discom))];
+  if (state.sortCol === 'discom') {
+    discomsPresent.sort((a, b) => state.sortDir * a.localeCompare(b));
+  } else {
+    discomsPresent.sort((a, b) => {
+      const ia = discomOrder.indexOf(a), ib = discomOrder.indexOf(b);
+      return (ia >= 0 ? ia : 99) - (ib >= 0 ? ib : 99);
+    });
+  }
+
+  for (const dName of discomsPresent) {
+    const dt = discomTotalsMap.get(dName);
+    const zRows = filtered.filter(r => r.discom === dName);
+    const isCollapsed = state.collapsedDiscoms.has(dName);
+
+    // Discom Total row (Level 0 - Summary Header Row)
+    aoa.push([
+      dName,
+      `${dName} Total`,
+      dt.total_feeders,
+      dt.line_0_5, dt.line_5_10, dt.line_10_20, dt.line_20_30,
+      dt.line_30_50, dt.line_50_70, dt.line_above_70, dt.line_abnormal,
+      dt.atc_0_5, dt.atc_5_10, dt.atc_10_20, dt.atc_20_30,
+      dt.atc_30_50, dt.atc_50_70, dt.atc_above_70, dt.atc_abnormal,
+      dt.ie_zero, dt.no_consumers_tagged
+    ]);
+    rowConfig.push({ level: 0 });
+
+    // Child Zone rows (Level 1 - Outlined & Collapsible under the Discom row)
+    for (const r of zRows) {
+      aoa.push([
+        '   ' + r.discom,
+        r.zone,
+        r.total_feeders,
+        r.line_0_5, r.line_5_10, r.line_10_20, r.line_20_30,
+        r.line_30_50, r.line_50_70, r.line_above_70, r.line_abnormal,
+        r.atc_0_5, r.atc_5_10, r.atc_10_20, r.atc_20_30,
+        r.atc_30_50, r.atc_50_70, r.atc_above_70, r.atc_abnormal,
+        r.ie_zero, r.no_consumers_tagged
+      ]);
+      rowConfig.push({ level: 1, hidden: isCollapsed });
+    }
+  }
+
+  // Grand Total row (only when displaying multi-discom / All of UPPCL)
+  if (!state.discom && !selectedZoneUpper && grandTotal.total_feeders > 0) {
+    aoa.push([
+      'UPPCL',
+      'Statewide Total',
+      grandTotal.total_feeders,
+      grandTotal.line_0_5, grandTotal.line_5_10, grandTotal.line_10_20, grandTotal.line_20_30,
+      grandTotal.line_30_50, grandTotal.line_50_70, grandTotal.line_above_70, grandTotal.line_abnormal,
+      grandTotal.atc_0_5, grandTotal.atc_5_10, grandTotal.atc_10_20, grandTotal.atc_20_30,
+      grandTotal.atc_30_50, grandTotal.atc_50_70, grandTotal.atc_above_70, grandTotal.atc_abnormal,
+      grandTotal.ie_zero, grandTotal.no_consumers_tagged
+    ]);
+    rowConfig.push({ level: 0 });
+  }
+
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+  // Set native outline levels and properties
+  ws['!rows'] = rowConfig;
+  ws['!outline'] = { above: true };
+
+  // Set merged cells for 2-tier header
+  ws['!merges'] = [
+    { s: { r: 0, c: 0 }, e: { r: 1, c: 0 } }, // Discom
+    { s: { r: 0, c: 1 }, e: { r: 1, c: 1 } }, // Zone / Rollup
+    { s: { r: 0, c: 2 }, e: { r: 1, c: 2 } }, // Total Feeders
+    { s: { r: 0, c: 3 }, e: { r: 0, c: 10 } }, // Line Loss Slab
+    { s: { r: 0, c: 11 }, e: { r: 0, c: 18 } }, // AT&C Loss Slab
+    { s: { r: 0, c: 19 }, e: { r: 1, c: 19 } }, // IE 0
+    { s: { r: 0, c: 20 }, e: { r: 1, c: 20 } }  // No Consumers Tagged
+  ];
+
+  // Set comfortable column widths
+  ws['!cols'] = [
+    { wch: 18 }, { wch: 24 }, { wch: 14 },
+    { wch: 9 }, { wch: 9 }, { wch: 9 }, { wch: 9 }, { wch: 9 }, { wch: 9 }, { wch: 9 }, { wch: 10 },
+    { wch: 9 }, { wch: 9 }, { wch: 9 }, { wch: 9 }, { wch: 9 }, { wch: 9 }, { wch: 9 }, { wch: 10 },
+    { wch: 9 }, { wch: 14 }
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Progressive Summary');
+  XLSX.writeFile(wb, `UPPCL_Progressive_Summary_Discoms_Zones_${new Date().toISOString().slice(0, 10)}.xlsx`);
+}
+
+const btnExpSummaryXlsx = document.getElementById('btnExportSummaryXlsx');
+if (btnExpSummaryXlsx) btnExpSummaryXlsx.addEventListener('click', exportProgressiveSummaryXlsx);
+
 // Notes Accordion
 const notesToggle = document.getElementById('notesToggle');
 if (notesToggle) {
