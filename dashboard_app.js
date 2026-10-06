@@ -802,8 +802,10 @@ function renderWorstFeeders(rows, totalAuditedAbove70) {
     });
   }
 
-  tbody.innerHTML = sorted.map((r, i) => `
-    <tr class="drill" onclick="window.open('feeder_drilldown.html?search=${encodeURIComponent(r.feeder)}', '_blank')">
+  tbody.innerHTML = sorted.map((r, i) => {
+    const drillUrl = 'feeder_drilldown.html?type=atc_loss&slab=' + encodeURIComponent('Above 70%') + '&search=' + encodeURIComponent(r.feeder).replace(/\+/g, '%2B');
+    return `
+    <tr class="drill" onclick="window.open('${drillUrl}', '_blank')">
       <td class="tx" style="color:var(--ink-3)">${i + 1}</td>
       <td class="tx" style="font-weight:600">${r.discom}</td>
       <td class="tx">${r.zone}</td>
@@ -811,9 +813,9 @@ function renderWorstFeeders(rows, totalAuditedAbove70) {
       <td class="tx" style="font-weight:600;color:var(--accent)">${r.feeder}</td>
       <td>${lossPill(r.ll, true)}</td>
       <td>${lossPill(r.atc, false)}</td>
-      <td class="tx"><a href="feeder_drilldown.html?search=${encodeURIComponent(r.feeder)}" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:500;">Inspect →</a></td>
+      <td class="tx"><a href="${drillUrl}" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:500;">Inspect →</a></td>
     </tr>
-  `).join('');
+  `}).join('');
 }
 
 function renderTop150Table(rows) {
@@ -839,8 +841,11 @@ function renderTop150Table(rows) {
     });
   }
 
-  tbody.innerHTML = sorted.map((r, i) => `
-    <tr class="drill" onclick="window.open('feeder_drilldown.html?search=${encodeURIComponent(r.feeder)}', '_blank')">
+  tbody.innerHTML = sorted.map((r, i) => {
+    const targetSlab = r.atcSlab || 'Above 70%';
+    const drillUrl = 'feeder_drilldown.html?type=atc_loss&slab=' + encodeURIComponent(targetSlab) + '&search=' + encodeURIComponent(r.feeder).replace(/\+/g, '%2B');
+    return `
+    <tr class="drill" onclick="window.open('${drillUrl}', '_blank')">
       <td class="tx" style="color:var(--ink-3)">${i + 1}</td>
       <td class="tx">${r.division}</td>
       <td class="tx">${r.substation}</td>
@@ -854,7 +859,7 @@ function renderTop150Table(rows) {
       <td>${thruRatePill(r.fTr)}</td>
       <td style="font-weight:700;color:var(--crit);">₹${fmt(r.atcLossValueCr, 2)}</td>
     </tr>
-  `).join('');
+  `}).join('');
 }
 
 function renderProgressiveSummaryTable(groups) {
@@ -1759,6 +1764,7 @@ const btnSignOut = document.getElementById('btnSignOut');
 if (btnSignOut) {
   btnSignOut.addEventListener('click', () => {
     sessionStorage.removeItem('uppcl_auth_token');
+    localStorage.removeItem('uppcl_auth_token');
     window.location.replace('login.html');
   });
 }

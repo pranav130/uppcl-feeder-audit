@@ -347,8 +347,10 @@ const SESSION_KEY = 'uppcl_auth_token';
 
 // ── Auto-redirect if already logged in ──────────────────────
 (function checkSession() {
-  const token = sessionStorage.getItem(SESSION_KEY);
+  const token = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY);
   if (token && token === btoa('UPPCL_AUTHENTICATED')) {
+    sessionStorage.setItem(SESSION_KEY, token);
+    localStorage.setItem(SESSION_KEY, token);
     window.location.replace(DASHBOARD_URL);
   }
 })();
@@ -398,6 +400,7 @@ function handleLogin(e) {
     if (expectedPassword && password === expectedPassword) {
       // ✅ Correct — set session and redirect
       sessionStorage.setItem(SESSION_KEY, btoa('UPPCL_AUTHENTICATED'));
+      localStorage.setItem(SESSION_KEY, btoa('UPPCL_AUTHENTICATED'));
       localStorage.setItem('uppcl_theme', html.getAttribute('data-theme'));
       btn.textContent = '✔ Authenticated! Redirecting...';
       setTimeout(() => {

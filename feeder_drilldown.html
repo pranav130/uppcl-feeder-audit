@@ -5,9 +5,12 @@
     /* ── Auth Guard: Redirect unauthenticated sessions to login page ── */
     (function() {
       try {
-        const token = sessionStorage.getItem('uppcl_auth_token');
+        const token = sessionStorage.getItem('uppcl_auth_token') || localStorage.getItem('uppcl_auth_token');
         if (!token || token !== btoa('UPPCL_AUTHENTICATED')) {
           window.location.replace('login.html');
+        } else {
+          sessionStorage.setItem('uppcl_auth_token', token);
+          localStorage.setItem('uppcl_auth_token', token);
         }
       } catch (e) {
         window.location.replace('login.html');
@@ -232,6 +235,7 @@
         </div>
     </div>
 
+    <script src="data/feeders.js"></script>
     <script>
         const slugMap = {
             '0% to 5%': '0_to_5_pct',
@@ -270,11 +274,67 @@
             'No_Cons': 'No Cons'
         };
 
+        function findFeederSlabFromRaw(term) {
+            if (!window.__FEEDERS_RAW || !window.__FEEDERS_RAW.rows || !term) return null;
+            const tRaw = term.toLowerCase().trim();
+            const tNorm = tRaw.replace(/\+/g, ' ');
+            const raw = window.__FEEDERS_RAW;
+            const found = raw.rows.find(r => {
+                const f = (r[5] || '').toLowerCase();
+                const fNorm = f.replace(/\+/g, ' ');
+                return f.includes(tRaw) || fNorm.includes(tNorm) || f.includes(tNorm);
+            });
+            if (!found) return null;
+
+            const fIE = found[8].reduce((a, b) => a + b, 0);
+            const fSE = found[9].reduce((a, b) => a + b, 0);
+            const fAss = found[10].reduce((a, b) => a + b, 0);
+            const fReal = found[11].reduce((a, b) => a + b, 0);
+            const cons = found[12];
+            const flags = found[13];
+
+            const be = fIE > 0 ? (fSE / fIE) * 100 : null;
+            const ce = fAss > 0 ? (fReal / fAss) * 100 : (fReal > 0 ? 100 : null);
+            const ll = be !== null ? 100 - be : null;
+            const atc = (be !== null && ce !== null) ? 100 - (be * ce / 100) : null;
+
+            function classify(loss) {
+                if (fIE === 0) return 'IE 0';
+                if (cons === 0 || (flags & 8)) return 'No Cons';
+                if (loss === null) return 'Abnormal';
+                if (loss < 0 || loss > 100) return 'Abnormal';
+                if (loss <= 5) return '0% to 5%';
+                if (loss <= 10) return '5% to 10%';
+                if (loss <= 20) return '10% to 20%';
+                if (loss <= 30) return '20% to 30%';
+                if (loss <= 50) return '30% to 50%';
+                if (loss <= 70) return '50% to 70%';
+                return 'Above 70%';
+            }
+
+            return {
+                lineSlab: classify(ll),
+                atcSlab: classify(atc),
+                feederName: found[5]
+            };
+        }
+
         const urlParams = new URLSearchParams(window.location.search);
         let lossType = urlParams.get('type') || 'line_loss';
         if (lossType !== 'atc_loss' && lossType !== 'line_loss') lossType = 'line_loss';
 
         let rawSlab = urlParams.get('slab') || '';
+        const searchParam = urlParams.get('search') || '';
+
+        // If search is provided without an explicit slab, auto-detect feeder's slab!
+        if (searchParam && !rawSlab) {
+            const info = findFeederSlabFromRaw(searchParam);
+            if (info) {
+                if (!urlParams.get('type') && info.atcSlab) lossType = 'atc_loss';
+                rawSlab = (lossType === 'atc_loss' ? info.atcSlab : info.lineSlab);
+            }
+        }
+
         let slug = slugMap[rawSlab] || '30_to_50_pct';
         let slabParam = titleMap[slug] || '30% to 50%';
 
@@ -325,15 +385,16 @@
 
         function matchSearch(row, term) {
             if (!term) return true;
-            const t = term.toLowerCase();
-            return (
-                (row[5] && row[5].toLowerCase().includes(t)) ||
-                (row[4] && row[4].toLowerCase().includes(t)) ||
-                (row[3] && row[3].toLowerCase().includes(t)) ||
-                (row[2] && row[2].toLowerCase().includes(t)) ||
-                (row[1] && row[1].toLowerCase().includes(t)) ||
-                (row[0] && row[0].toLowerCase().includes(t))
-            );
+            const tRaw = term.toLowerCase().trim();
+            const tNorm = tRaw.replace(/\+/g, ' ');
+            for (let idx of [5, 4, 3, 2, 1, 0]) {
+                const cell = (row[idx] || '').toString().toLowerCase();
+                const cellNorm = cell.replace(/\+/g, ' ');
+                if (cell.includes(tRaw) || cell.includes(tNorm) || cellNorm.includes(tNorm) || cellNorm.includes(tRaw)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         function updateHeaderInfo() {
@@ -496,6 +557,21 @@
             filteredRows = data.rows.filter(r => {
                 return matchDiscom(r[0], discom) && matchSearch(r, search);
             });
+
+            if (filteredRows.length === 0 && search) {
+                const info = findFeederSlabFromRaw(search);
+                if (info) {
+                    const detectedSlab = (lossType === 'atc_loss' ? info.atcSlab : info.lineSlab);
+                    const newSlug = slugMap[detectedSlab];
+                    if (newSlug && newSlug !== slug) {
+                        slug = newSlug;
+                        slabParam = titleMap[slug];
+                        document.getElementById('slabSelect').value = slug;
+                        loadStaticDataset();
+                        return;
+                    }
+                }
+            }
 
             updateKpis(filteredRows, data);
 
