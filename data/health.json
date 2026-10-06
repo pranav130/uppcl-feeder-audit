@@ -1,6 +1,6 @@
 {
   "status": "ok",
   "database": "energy_db",
-  "serverTime": "2026-10-06T08:35:49.534Z",
+  "serverTime": "2026-10-06T08:40:27.866Z",
   "pgVersion": "PostgreSQL 18.4 on x86_64-windows, compiled by msvc-19.44.35227, 64-bit"
 }
