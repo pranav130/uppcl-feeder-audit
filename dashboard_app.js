@@ -46,6 +46,8 @@ const state = {
   discomSortDir: -1,
   top150SortCol: 'atcLossValueCr',
   top150SortDir: -1,
+  wfSortCol: 'atc',
+  wfSortDir: -1,
   collapsedDiscoms: new Set(),
   hBarType: 'atc',
   ftBarGroup: 'feederType'
@@ -788,7 +790,19 @@ function renderWorstFeeders(rows, totalAuditedAbove70) {
     return;
   }
 
-  tbody.innerHTML = rows.map((r, i) => `
+  let sorted = [...rows];
+  if (state.wfSortCol) {
+    const col = state.wfSortCol;
+    const dir = state.wfSortDir;
+    sorted.sort((a, b) => {
+      const va = a[col];
+      const vb = b[col];
+      if (typeof va === 'string') return dir * (va || '').localeCompare(vb || '');
+      return dir * ((Number(va) || 0) - (Number(vb) || 0));
+    });
+  }
+
+  tbody.innerHTML = sorted.map((r, i) => `
     <tr class="drill" onclick="window.open('feeder_drilldown.html?search=${encodeURIComponent(r.feeder)}', '_blank')">
       <td class="tx" style="color:var(--ink-3)">${i + 1}</td>
       <td class="tx" style="font-weight:600">${r.discom}</td>
@@ -813,7 +827,19 @@ function renderTop150Table(rows) {
     return;
   }
 
-  tbody.innerHTML = rows.map((r, i) => `
+  let sorted = [...rows];
+  if (state.top150SortCol) {
+    const col = state.top150SortCol;
+    const dir = state.top150SortDir;
+    sorted.sort((a, b) => {
+      const va = a[col];
+      const vb = b[col];
+      if (typeof va === 'string') return dir * (va || '').localeCompare(vb || '');
+      return dir * ((Number(va) || 0) - (Number(vb) || 0));
+    });
+  }
+
+  tbody.innerHTML = sorted.map((r, i) => `
     <tr class="drill" onclick="window.open('feeder_drilldown.html?search=${encodeURIComponent(r.feeder)}', '_blank')">
       <td class="tx" style="color:var(--ink-3)">${i + 1}</td>
       <td class="tx">${r.division}</td>
@@ -891,17 +917,27 @@ function renderProgressiveSummaryTable(groups) {
   if (state.sortCol) {
     const col = state.sortCol;
     const dir = state.sortDir;
-    filtered.sort((a, b) => dir * ((Number(a[col]) || 0) - (Number(b[col]) || 0)));
+    filtered.sort((a, b) => {
+      const va = a[col];
+      const vb = b[col];
+      if (typeof va === 'string') return dir * (va || '').localeCompare(vb || '');
+      return dir * ((Number(va) || 0) - (Number(vb) || 0));
+    });
   }
 
   // Assemble final rows with collapsible Discom total headers
   let html = '';
 
   const discomOrder = ['PASCHIMANCHAL', 'DAKSHINANCHAL', 'MADHYANCHAL', 'POORVANCHAL', 'KESCO'];
-  const discomsPresent = [...new Set(filtered.map(r => r.discom))].sort((a, b) => {
-    const ia = discomOrder.indexOf(a), ib = discomOrder.indexOf(b);
-    return (ia >= 0 ? ia : 99) - (ib >= 0 ? ib : 99);
-  });
+  let discomsPresent = [...new Set(filtered.map(r => r.discom))];
+  if (state.sortCol === 'discom') {
+    discomsPresent.sort((a, b) => state.sortDir * a.localeCompare(b));
+  } else {
+    discomsPresent.sort((a, b) => {
+      const ia = discomOrder.indexOf(a), ib = discomOrder.indexOf(b);
+      return (ia >= 0 ? ia : 99) - (ib >= 0 ? ib : 99);
+    });
+  }
 
   for (const dName of discomsPresent) {
     const dt = discomTotalsMap.get(dName);
@@ -1024,10 +1060,6 @@ function onFilterChanged() {
   renderWorstFeeders(computedResult.worst10, computedResult.atcSlabs['Above 70%']);
   renderTop150Table(computedResult.top150);
   renderProgressiveSummaryTable(computedResult.progressiveSummary);
-
-  const csvUrl = state.discom ? `/api/psr/summary/download?format=csv&discom=${encodeURIComponent(state.discom)}` : '/api/psr/summary/download?format=csv';
-  const csvBtn = document.getElementById('btnSummaryCsv');
-  if (csvBtn) csvBtn.href = csvUrl;
 }
 
 // ── Event Listeners ──
@@ -1178,6 +1210,10 @@ window.resetFilters = function() {
   state.sortDir = 1;
   state.discomSortCol = null;
   state.discomSortDir = -1;
+  state.top150SortCol = 'atcLossValueCr';
+  state.top150SortDir = -1;
+  state.wfSortCol = 'atc';
+  state.wfSortDir = -1;
   state.collapsedDiscoms.clear();
 
   document.getElementById('fDiscom').value = '';
@@ -1194,13 +1230,29 @@ window.resetFilters = function() {
   document.getElementById('chkBilledGtInput').checked = false;
   document.getElementById('chkZeroInput').checked = false;
 
+  // Reset visual sort header states
+  document.querySelectorAll('th.sorted').forEach(t => t.classList.remove('sorted'));
+  document.querySelectorAll('th .sort-ico').forEach(ico => ico.textContent = '↕');
+  const dDef = document.querySelector('#top150Table th[data-t150col="atcLossValueCr"]');
+  if (dDef) {
+    dDef.classList.add('sorted');
+    const ico = dDef.querySelector('.sort-ico');
+    if (ico) ico.textContent = '▼';
+  }
+  const wDef = document.querySelector('#wfTable th[data-wfcol="atc"]');
+  if (wDef) {
+    wDef.classList.add('sorted');
+    const ico = wDef.querySelector('.sort-ico');
+    if (ico) ico.textContent = '▼';
+  }
+
   syncCascadeDropdowns();
   onFilterChanged();
 };
 
 document.getElementById('btnReset').addEventListener('click', resetFilters);
 
-// Summary Table Sorting
+// ── 1. Summary Table Sorting (#summaryTbl) ──
 document.querySelectorAll('#summaryTbl th[data-col]').forEach(th => {
   th.addEventListener('click', () => {
     const col = th.getAttribute('data-col');
@@ -1211,6 +1263,7 @@ document.querySelectorAll('#summaryTbl th[data-col]').forEach(th => {
       state.sortDir = -1;
     }
     document.querySelectorAll('#summaryTbl th.sorted').forEach(t => t.classList.remove('sorted'));
+    document.querySelectorAll('#summaryTbl th .sort-ico').forEach(ico => ico.textContent = '↕');
     th.classList.add('sorted');
     const sortIcon = th.querySelector('.sort-ico');
     if (sortIcon) sortIcon.textContent = state.sortDir === 1 ? '▲' : '▼';
@@ -1220,7 +1273,7 @@ document.querySelectorAll('#summaryTbl th[data-col]').forEach(th => {
   });
 });
 
-// By Discom Table Sorting
+// ── 2. By Discom Table Sorting (#tblByDiscom) ──
 document.querySelectorAll('#tblByDiscom th[data-dcol]').forEach(th => {
   th.addEventListener('click', () => {
     const col = th.getAttribute('data-dcol');
@@ -1231,6 +1284,7 @@ document.querySelectorAll('#tblByDiscom th[data-dcol]').forEach(th => {
       state.discomSortDir = -1;
     }
     document.querySelectorAll('#tblByDiscom th.sorted').forEach(t => t.classList.remove('sorted'));
+    document.querySelectorAll('#tblByDiscom th .sort-ico').forEach(ico => ico.textContent = '↕');
     th.classList.add('sorted');
     const sortIcon = th.querySelector('.sort-ico');
     if (sortIcon) sortIcon.textContent = state.discomSortDir === 1 ? '▲' : '▼';
@@ -1240,14 +1294,130 @@ document.querySelectorAll('#tblByDiscom th[data-dcol]').forEach(th => {
   });
 });
 
-// Export Summary Table CSV
+// ── 3. Worst 10 (>70% Slab) Table Sorting (#wfTable) ──
+document.querySelectorAll('#wfTable th[data-wfcol]').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.getAttribute('data-wfcol');
+    if (state.wfSortCol === col) {
+      state.wfSortDir *= -1;
+    } else {
+      state.wfSortCol = col;
+      state.wfSortDir = -1;
+    }
+    document.querySelectorAll('#wfTable th.sorted').forEach(t => t.classList.remove('sorted'));
+    document.querySelectorAll('#wfTable th .sort-ico').forEach(ico => ico.textContent = '↕');
+    th.classList.add('sorted');
+    const sortIcon = th.querySelector('.sort-ico');
+    if (sortIcon) sortIcon.textContent = state.wfSortDir === 1 ? '▲' : '▼';
+    if (computedResult) {
+      renderWorstFeeders(computedResult.worst10, computedResult.atcSlabs ? computedResult.atcSlabs['Above 70%'] : 0);
+    }
+  });
+});
+
+// ── 4. Top 150 AT&C Loss Value Table Sorting (#top150Table) ──
+document.querySelectorAll('#top150Table th[data-t150col]').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.getAttribute('data-t150col');
+    if (state.top150SortCol === col) {
+      state.top150SortDir *= -1;
+    } else {
+      state.top150SortCol = col;
+      state.top150SortDir = -1;
+    }
+    document.querySelectorAll('#top150Table th.sorted').forEach(t => t.classList.remove('sorted'));
+    document.querySelectorAll('#top150Table th .sort-ico').forEach(ico => ico.textContent = '↕');
+    th.classList.add('sorted');
+    const sortIcon = th.querySelector('.sort-ico');
+    if (sortIcon) sortIcon.textContent = state.top150SortDir === 1 ? '▲' : '▼';
+    if (computedResult) {
+      renderTop150Table(computedResult.top150);
+    }
+  });
+});
+
+// ── 5. Export Executive Summary CSV (Header Button #btnSummaryCsv) ──
+function exportExecutiveSummaryCsv() {
+  if (!computedResult) return;
+  const dSummary = computedResult.discomSummary || [];
+  const kpis = computedResult.kpis || {};
+
+  const headers = [
+    'Discom / Entity', 'Audited Feeders', 'Input Energy (MU)', 'Billed Energy (MU)',
+    'Billing Efficiency (%)', 'Collection Efficiency (%)', 'Line Loss (%)',
+    'AT&C Loss (%)', 'ABR (Rs/kWh)', 'Thru Rate (Rs/kWh)',
+    'Realised Amount (Rs Cr)', 'AT&C Loss Value (Rs Cr)'
+  ];
+
+  const escapeVal = v => {
+    if (v === null || v === undefined) return '';
+    const s = String(v);
+    return (s.includes(',') || s.includes('"') || s.includes('\n')) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+
+  const csvLines = [];
+  csvLines.push(`# UPPCL 11KV Feeder Executive Performance Summary`);
+  csvLines.push(`# Generated: ${new Date().toLocaleString('en-IN')}`);
+  csvLines.push(headers.join(','));
+
+  for (const r of dSummary) {
+    const ll = (r.billingEff !== null && r.billingEff !== undefined) ? (100 - r.billingEff).toFixed(2) : '';
+    csvLines.push([
+      escapeVal(r.discom),
+      r.feeders || 0,
+      r.inputMu ? r.inputMu.toFixed(2) : 0,
+      r.billedMu ? r.billedMu.toFixed(2) : 0,
+      r.billingEff ? r.billingEff.toFixed(2) : 0,
+      r.collectionEff ? r.collectionEff.toFixed(2) : 0,
+      ll,
+      r.atcLoss ? r.atcLoss.toFixed(2) : 0,
+      r.abr ? r.abr.toFixed(2) : 0,
+      r.thruRate ? r.thruRate.toFixed(2) : 0,
+      r.realisedCr ? r.realisedCr.toFixed(2) : 0,
+      r.atcLossValueCr ? r.atcLossValueCr.toFixed(2) : 0
+    ].join(','));
+  }
+
+  // Grand Total row
+  if (kpis) {
+    csvLines.push([
+      'UPPCL Statewide Total',
+      kpis.auditedFeeders || 0,
+      kpis.inputEnergyMu ? kpis.inputEnergyMu.toFixed(2) : 0,
+      kpis.soldEnergyMu ? kpis.soldEnergyMu.toFixed(2) : 0,
+      kpis.billingEfficiency ? kpis.billingEfficiency.toFixed(2) : 0,
+      kpis.collectionEfficiency ? kpis.collectionEfficiency.toFixed(2) : 0,
+      kpis.lineLoss ? kpis.lineLoss.toFixed(2) : 0,
+      kpis.atcLoss ? kpis.atcLoss.toFixed(2) : 0,
+      kpis.avgBillingRate ? kpis.avgBillingRate.toFixed(2) : 0,
+      kpis.thruRate ? kpis.thruRate.toFixed(2) : 0,
+      kpis.realizationCr ? kpis.realizationCr.toFixed(2) : 0,
+      kpis.atcLossValueCr ? kpis.atcLossValueCr.toFixed(2) : 0
+    ].join(','));
+  }
+
+  const blob = new Blob([csvLines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `UPPCL_Executive_Summary_${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+const btnSummaryCsv = document.getElementById('btnSummaryCsv');
+if (btnSummaryCsv) btnSummaryCsv.addEventListener('click', exportExecutiveSummaryCsv);
+
+// ── 6. Export Progressive Summary CSV (WYSIWYG: strictly honors Discom expansion & compression) ──
 function exportProgressiveSummaryCsv() {
   if (!computedResult) return;
-  const rows = computedResult.progressiveSummary || [];
+  const groups = computedResult.progressiveSummary || [];
   const selectedZoneUpper = (state.zone || '').trim().toUpperCase();
   const search = (state.tableSearch || '').trim().toLowerCase();
 
-  let filtered = rows;
+  let filtered = [...groups];
   if (selectedZoneUpper) {
     filtered = filtered.filter(r => r.zone && r.zone.trim().toUpperCase() === selectedZoneUpper);
   }
@@ -1258,8 +1428,54 @@ function exportProgressiveSummaryCsv() {
     );
   }
 
+  // Calculate totals by Discom and Grand Total
+  const discomTotalsMap = new Map();
+  const grandTotal = {
+    discom: 'UPPCL', zone: 'Statewide Total', total_feeders: 0,
+    line_0_5: 0, line_5_10: 0, line_10_20: 0, line_20_30: 0,
+    line_30_50: 0, line_50_70: 0, line_above_70: 0, line_abnormal: 0,
+    atc_0_5: 0, atc_5_10: 0, atc_10_20: 0, atc_20_30: 0,
+    atc_30_50: 0, atc_50_70: 0, atc_above_70: 0, atc_abnormal: 0,
+    ie_zero: 0, no_consumers_tagged: 0, row_type: 3
+  };
+
+  const cols = [
+    'total_feeders', 'line_0_5', 'line_5_10', 'line_10_20', 'line_20_30',
+    'line_30_50', 'line_50_70', 'line_above_70', 'line_abnormal',
+    'atc_0_5', 'atc_5_10', 'atc_10_20', 'atc_20_30',
+    'atc_30_50', 'atc_50_70', 'atc_above_70', 'atc_abnormal',
+    'ie_zero', 'no_consumers_tagged'
+  ];
+
+  filtered.forEach(r => {
+    if (!discomTotalsMap.has(r.discom)) {
+      discomTotalsMap.set(r.discom, {
+        discom: r.discom, zone: `${r.discom} Total`, row_type: 2
+      });
+      cols.forEach(c => discomTotalsMap.get(r.discom)[c] = 0);
+    }
+    const dt = discomTotalsMap.get(r.discom);
+    cols.forEach(c => {
+      const v = Number(r[c]) || 0;
+      dt[c] += v;
+      grandTotal[c] += v;
+    });
+  });
+
+  // Sort zone rows if requested
+  if (state.sortCol) {
+    const col = state.sortCol;
+    const dir = state.sortDir;
+    filtered.sort((a, b) => {
+      const va = a[col];
+      const vb = b[col];
+      if (typeof va === 'string') return dir * (va || '').localeCompare(vb || '');
+      return dir * ((Number(va) || 0) - (Number(vb) || 0));
+    });
+  }
+
   const headers = [
-    'Discom','Zone','Total Feeders',
+    'Discom','Zone / Rollup','Total Feeders',
     'Line 0-5%','Line 5-10%','Line 10-20%','Line 20-30%',
     'Line 30-50%','Line 50-70%','Line >70%','Line Abnormal',
     'AT&C 0-5%','AT&C 5-10%','AT&C 10-20%','AT&C 20-30%',
@@ -1274,14 +1490,63 @@ function exportProgressiveSummaryCsv() {
   };
 
   const csvLines = [headers.join(',')];
-  for (const r of filtered) {
+
+  const discomOrder = ['PASCHIMANCHAL', 'DAKSHINANCHAL', 'MADHYANCHAL', 'POORVANCHAL', 'KESCO'];
+  let discomsPresent = [...new Set(filtered.map(r => r.discom))];
+  if (state.sortCol === 'discom') {
+    discomsPresent.sort((a, b) => state.sortDir * a.localeCompare(b));
+  } else {
+    discomsPresent.sort((a, b) => {
+      const ia = discomOrder.indexOf(a), ib = discomOrder.indexOf(b);
+      return (ia >= 0 ? ia : 99) - (ib >= 0 ? ib : 99);
+    });
+  }
+
+  for (const dName of discomsPresent) {
+    const dt = discomTotalsMap.get(dName);
+    const zRows = filtered.filter(r => r.discom === dName);
+    const isCollapsed = state.collapsedDiscoms.has(dName);
+
+    // Discom Total row
     csvLines.push([
-      escapeVal(r.discom), escapeVal(r.zone), r.total_feeders,
-      r.line_0_5, r.line_5_10, r.line_10_20, r.line_20_30,
-      r.line_30_50, r.line_50_70, r.line_above_70, r.line_abnormal,
-      r.atc_0_5, r.atc_5_10, r.atc_10_20, r.atc_20_30,
-      r.atc_30_50, r.atc_50_70, r.atc_above_70, r.atc_abnormal,
-      r.ie_zero, r.no_consumers_tagged
+      escapeVal(dName),
+      escapeVal(`${dName} Total`),
+      dt.total_feeders,
+      dt.line_0_5, dt.line_5_10, dt.line_10_20, dt.line_20_30,
+      dt.line_30_50, dt.line_50_70, dt.line_above_70, dt.line_abnormal,
+      dt.atc_0_5, dt.atc_5_10, dt.atc_10_20, dt.atc_20_30,
+      dt.atc_30_50, dt.atc_50_70, dt.atc_above_70, dt.atc_abnormal,
+      dt.ie_zero, dt.no_consumers_tagged
+    ].join(','));
+
+    // If expanded, include individual zone rows
+    if (!isCollapsed) {
+      for (const r of zRows) {
+        csvLines.push([
+          escapeVal(r.discom),
+          escapeVal(r.zone),
+          r.total_feeders,
+          r.line_0_5, r.line_5_10, r.line_10_20, r.line_20_30,
+          r.line_30_50, r.line_50_70, r.line_above_70, r.line_abnormal,
+          r.atc_0_5, r.atc_5_10, r.atc_10_20, r.atc_20_30,
+          r.atc_30_50, r.atc_50_70, r.atc_above_70, r.atc_abnormal,
+          r.ie_zero, r.no_consumers_tagged
+        ].join(','));
+      }
+    }
+  }
+
+  // Grand Total row (only when displaying multi-discom / All of UPPCL)
+  if (!state.discom && !selectedZoneUpper && grandTotal.total_feeders > 0) {
+    csvLines.push([
+      'UPPCL',
+      'Statewide Total',
+      grandTotal.total_feeders,
+      grandTotal.line_0_5, grandTotal.line_5_10, grandTotal.line_10_20, grandTotal.line_20_30,
+      grandTotal.line_30_50, grandTotal.line_50_70, grandTotal.line_above_70, grandTotal.line_abnormal,
+      grandTotal.atc_0_5, grandTotal.atc_5_10, grandTotal.atc_10_20, grandTotal.atc_20_30,
+      grandTotal.atc_30_50, grandTotal.atc_50_70, grandTotal.atc_above_70, grandTotal.atc_abnormal,
+      grandTotal.ie_zero, grandTotal.no_consumers_tagged
     ].join(','));
   }
 
